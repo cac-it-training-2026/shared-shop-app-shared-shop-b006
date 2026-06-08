@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jp.co.sss.shop.bean.ItemBean;
 import jp.co.sss.shop.entity.Item;
@@ -45,6 +46,7 @@ public class ClientItemShowController {
 
 		/*TODO 現在は全件表示を行っている
 		 * これを売れ筋（注文回数が多い順）に改修する*/
+		// 💡ここは「近藤さん」の担当なので、元の状態のまま触らずに残しておきます！
 
 		// 注文情報の商品情報を全件表示
 		List<Item> itemList = itemRepository.findAll();
@@ -59,28 +61,59 @@ public class ClientItemShowController {
 	}
 
 	/**
+	 * 商品一覧画面 表示処理（新着順・売れ筋順）
+	 * @param sortType 1:新着順, 2:売れ筋順
+	 * @param categoryId カテゴリID（任意）
+	 * @param model Viewとの値受渡し
+	 * @return "client/item/list" 商品一覧画面
+	 */
+	@RequestMapping(path = "/client/item/list/{sortType}", method = { RequestMethod.GET, RequestMethod.POST })
+	public String showItemList(@PathVariable int sortType,
+			@RequestParam(name = "categoryId", required = false) Integer categoryId, Model model) {
+
+		List<Item> itemList;
+
+		// 1. 売れ筋順 (sortType == 2) の場合
+		if (sortType == 2) {
+			if (categoryId != null) {
+				itemList = itemRepository.findByCategoryIdAndDeleteFlagOrderBySalesDesc(categoryId,
+						Constant.NOT_DELETED);
+			} else {
+				itemList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
+			}
+		}
+		// 2. 新着順 (sortType == 1) の場合
+		else {
+			if (categoryId != null) {
+				itemList = itemRepository.findByCategoryIdAndDeleteFlagOrderByInsertDateDesc(categoryId,
+						Constant.NOT_DELETED);
+			} else {
+				itemList = itemRepository.findByDeleteFlagOrderByInsertDateDesc(Constant.NOT_DELETED);
+			}
+		}
+
+		// 検索結果をBeanリストに変換
+		List<ItemBean> itemBeanList = beanTools.copyEntityListToItemBeanList(itemList);
+
+		// 画面に値を渡す
+		model.addAttribute("items", itemBeanList);
+		model.addAttribute("sortType", sortType);
+		model.addAttribute("categoryId", categoryId);
+
+		return "client/item/list";
+	}
+
+	/**
 	 * 詳細表示処理
-	 *
-	 * @param id      表示対象ID
-	 * @param model   Viewとの値受渡し
-	 * @return "client/item/detail" 詳細画面 表示
 	 */
 	@RequestMapping(path = "/client/item/detail/{id}")
 	public String showItem(@PathVariable int id, Model model) {
-
-		// 商品IDに該当する商品情報を取得する
 		Item item = itemRepository.findByIdAndDeleteFlag(id, Constant.NOT_DELETED);
 		if (item == null) {
 			return "redirect:/syserror";
 		}
-
-		// Itemエンティティの各フィールドの値をItemBeanにコピー
 		ItemBean itemBean = beanTools.copyEntityToItemBean(item);
-
-		// 商品情報をViewへ渡す
 		model.addAttribute("item", itemBean);
-
 		return "client/item/detail";
 	}
-
 }
