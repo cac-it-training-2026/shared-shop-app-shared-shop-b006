@@ -1,12 +1,13 @@
 package jp.co.sss.shop.controller.client.user;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -16,7 +17,8 @@ import jp.co.sss.shop.form.UserForm;
 import jp.co.sss.shop.repository.UserRepository;
 
 /**
- * 一般会員の会員情報変更処理を制御するコントローラクラス
+ * 会員管理 変更機能(一般会員)のコントローラクラス
+ * 登録情報の多重送信を防止するため、Post-Redirect-Get（PRG）パターンを用いて実装
  * * 
  */
 @Controller
@@ -25,172 +27,172 @@ public class ClientUserUpdateController {
 	/** 未削除状態を表す定数（削除フラグ: 0） */
 	private static final int NOT_DELETED = 0;
 
-	/** ユーザー情報にアクセスするためのリポジトリ */
+	/** 会員情報 リポジトリ */
 	@Autowired
 	private UserRepository userRepository;
 
-	/**
-	 * 処理1：（変更ボタン 押下時処理）、（確認画面-戻るボタン 押下時処理）を行います。
-	 * セッションスコープに入力フォーム情報があるかを確認し、なければセッションに保存されたIDを使用して変更対象データを取得し、初期表示用のフォーム情報を新規生成してセッションに保存します。その後、変更入力画面表示処理へリダイレクトします。
-	 * * @param session セッションスコープにアクセスするためのHttpSessionオブジェクト
-	 * @return 変更入力画面表示処理へのリダイレクトパス文字列
-	 */
-	@PostMapping("/client/user/update/input")
-	public String updateInput(final HttpSession session) {
-		// セッションスコープに入力フォーム情報があるかを確認
-		final UserForm userForm = (UserForm) session.getAttribute("userForm");
+	/** セッション */
+	@Autowired
+	private HttpSession session;
 
+	/**
+	 * 処理1：入力画面 初期表示処理(POST)
+	 * セッションスコープより入力情報を取り出し、無ければログインユーザー情報から初期表示用フォーム情報を生成してセッションに保持
+	 * * @return "redirect:/client/user/update/input" 変更入力画面 表示処理へのリダイレクト
+	 */
+	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.POST)
+	public String updateInput() {
+		// セッションスコープより入力情報を取り出す
+		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
-			// なければ下記の処理を実施
-			// 一般会員変更はセッションに保存されたID（loginUser）を使用し、変更対象のデータをDBから取得
+			// セッションから一般会員のログイン情報を取得
 			final UserBean loginUser = (UserBean) session.getAttribute("loginUser");
 			if (loginUser == null) {
+				// ログイン情報がない場合、ログイン画面へ
 				return "redirect:/login";
 			}
 
+			// ログインユーザーのIDを元に、変更対象の情報取得
 			final User user = userRepository.findByIdAndDeleteFlag(loginUser.getId(), NOT_DELETED);
 			if (user == null) {
-				return "common/error";
+				// 対象が無い場合、エラー
+				return "redirect:/syserror";
 			}
 
-			// 取得データを元に入力画面初期表示用の入力フォーム情報を新規生成
-			final UserForm initialForm = new UserForm();
-			initialForm.setId(user.getId());
-			initialForm.setEmail(user.getEmail());
-			initialForm.setPassword(user.getPassword());
-			initialForm.setName(user.getName());
-			initialForm.setPostalCode(user.getPostalCode());
-			initialForm.setAddress(user.getAddress());
-			initialForm.setPhoneNumber(user.getPhoneNumber());
-			initialForm.setAuthority(user.getAuthority());
+			// 初期表示用フォーム情報の生成
+			userForm = new UserForm();
+			// 変更対象の情報をuserFormにコピー
+			BeanUtils.copyProperties(user, userForm);
 
-			// 入力フォーム情報をセッションスコープに保存
-			session.setAttribute("userForm", initialForm);
+			// 変更入力フォームをセッションに保持
+			session.setAttribute("userForm", userForm);
 		}
 
-		// 変更入力画面表示処理へリダイレクト
+		// 変更入力画面 表示処理へリダイレクト
 		return "redirect:/client/user/update/input";
 	}
 
 	/**
-	 * 処理2：（変更入力画面表示処理）を行います。
-	 * セッションスコープから入力フォーム情報を取得してリクエストスコープに設定します。セッションスコープに入力エラー情報がある場合はそれをリクエストスコープに設定し、セッションから削除した上で、変更入力画面を表示します。
-	 * * @param model リクエストスコープに値を設定するためのModelオブジェクト
-	 * @param session セッションスコープから情報を取得するためのHttpSessionオブジェクト
-	 * @return 変更入力画面の表示用テンプレート名（フォワード）
+	 * 処理2：入力画面 表示処理(GET)
+	 * セッションから入力フォーム情報を取得して画面に設定し、セッションにエラー情報があればそれも画面へ設定して削除
+	 * * @param model Viewとの値受渡し用のModelオブジェクト
+	 * @return "client/user/update_input" 変更入力画面 表示（フォワード）
 	 */
-	@GetMapping("/client/user/update/input")
-	public String updateInputView(final Model model, final HttpSession session) {
-		// セッションスコープから入力フォーム情報を取得
-		final Object sessionForm = session.getAttribute("userForm");
-		final UserForm userForm = (sessionForm != null) ? (UserForm) sessionForm : new UserForm();
-
-		// 入力フォーム情報をリクエストスコープに設定
+	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.GET)
+	public String updateInputView(final Model model) {
+		// セッションから入力フォーム取得
+		final UserForm userForm = (UserForm) session.getAttribute("userForm");
+		if (userForm == null) {
+			// セッション情報がない場合、エラー
+			return "redirect:/syserror";
+		}
+		// 入力フォーム情報を画面表示設定
 		model.addAttribute("userForm", userForm);
 
-		// セッションスコープに入力エラー情報がある場合
-		final String errorKey = "org.springframework.validation.BindingResult.userForm";
-		final Object bindingResult = session.getAttribute(errorKey);
-		if (bindingResult != null) {
-			// 取得した入力エラー情報をリクエストスコープに設定
-			model.addAttribute(errorKey, bindingResult);
-
-			// セッションスコープから、入力エラー情報を削除
-			session.removeAttribute(errorKey);
+		final BindingResult result = (BindingResult) session.getAttribute("result");
+		if (result != null) {
+			// セッションにエラー情報がある場合、エラー情報を画面表示設定
+			model.addAttribute("org.springframework.validation.BindingResult.userForm", result);
+			// セッションのエラー情報を削除
+			session.removeAttribute("result");
 		}
 
-		// 変更入力画面表示（フォワード）
+		// 変更入力画面 表示（フォワード）
 		return "client/user/update_input";
 	}
 
 	/**
-	 * 処理3：（確認ボタン 押下時処理）を行います。
-	 * 画面から入力された入力フォームをセッションスコープに入力フォーム情報として保存し、BindingResultに入力エラー情報がある場合はセッションに設定して変更入力画面表示処理にリダイレクトします。エラーがない場合は変更確認画面表示処理にリダイレクトします。
-	 * * @param userForm 画面から入力されたユーザー情報のフォームオブジェクト
-	 * @param result 入力チェック結果を保持するBindingResultオブジェクト
-	 * @param session セッションスコープにフォーム情報やエラー情報を保存するためのHttpSessionオブジェクト
+	 * 処理3：変更確認処理(POST)
+	 * 画面からの入力をセッションに保持し、入力値チェックの結果に応じて入力画面または確認画面へリダイレクト
+	 * * @param form 入力フォームオブジェクト
+	 * @param result 入力チェック結果
 	 * @return 次の処理ステップに対応するリダイレクトパス文字列
 	 */
-	@PostMapping("/client/user/update/check")
-	public String updateCheck(
-			@Valid @ModelAttribute final UserForm userForm,
-			final BindingResult result,
-			final HttpSession session) {
+	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.POST)
+	public String updateCheck(@Valid @ModelAttribute final UserForm form, final BindingResult result) {
+		// 直前のセッション情報を取得
+		final UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
+		if (lastUserForm == null) {
+			// セッション情報が無い場合、エラー
+			return "redirect:/syserror";
+		}
+		if (form.getAuthority() == null) {
+			// 権限情報がない場合、セッション情報から値をセット
+			form.setAuthority(lastUserForm.getAuthority());
+		}
 
-		// 画面から入力された入力フォームを、セッションスコープに入力フォーム情報として保存
-		session.setAttribute("userForm", userForm);
+		// 入力フォーム情報をセッションに保持
+		session.setAttribute("userForm", form);
 
-		// BindingResultオブジェクトに入力エラー情報がある場合
+		// 入力値にエラーがあった場合、入力画面に戻る
 		if (result.hasErrors()) {
-			// 入力エラー情報をセッションスコープに設定
-			session.setAttribute("org.springframework.validation.BindingResult.userForm", result);
-
-			// 変更入力画面表示処理にリダイレクト
+			session.setAttribute("result", result);
+			// 変更入力画面 表示処理へリダイレクト
 			return "redirect:/client/user/update/input";
 		}
 
-		// 入力エラーがない場合：変更確認画面表示処理にリダイレクト
+		// 変更確認画面 表示処理へリダイレクト
 		return "redirect:/client/user/update/check";
 	}
 
 	/**
-	 * 処理4：（変更確認画面表示処理）を行います。
-	 * セッションスコープから入力フォーム情報を取得し、リクエストスコープに設定した上で登録確認画面を表示します。
-	 * * @param model リクエストスコープに値を設定するためのModelオブジェクト
-	 * @param session セッションスコープから情報を取得するためのHttpSessionオブジェクト
-	 * @return 変更確認画面の表示用テンプレート名（フォワード）
+	 * 処理4：確認画面 表示処理(GET）
+	 * セッションからフォーム情報を取得し、Modelに設定して変更確認画面を表示
+	 * * @param model Viewとの値受渡し用のModelオブジェクト
+	 * @return "client/user/update_check" 確認画面表示（フォワード）
 	 */
-	@GetMapping("/client/user/update/check")
-	public String updateCheckView(final Model model, final HttpSession session) {
-		// セッションスコープから入力フォーム情報を取得
+	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.GET)
+	public String updateCheckView(final Model model) {
+		// セッションから入力フォーム情報取得
 		final UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
-			return "redirect:/client/user/update/input";
+			// セッション情報がない場合、エラー
+			return "redirect:/syserror";
 		}
-
-		// 入力フォーム情報をリクエストスコープに設定
+		// 入力フォーム情報をスコープへ設定
 		model.addAttribute("userForm", userForm);
 
-		// 登録確認画面表示（フォワード）
+		// 変更確認画面 表示（フォワード）
 		return "client/user/update_check";
 	}
 
 	/**
-	 * 処理5：（登録ボタン 押下時処理）を行います。
-	 * セッションスコープから入力フォーム情報を取得してDB登録用エンティティオブジェクトを生成し、DB更新を実施します。その後、セッションスコープの入力フォーム情報を削除し、ログインユーザの会員情報を更新した上で変更完了画面表示処理にリダイレクトします。
-	 * * @param session セッションスコープのフォーム情報を取得し、会員情報を同期するためのHttpSessionオブジェクト
-	 * @return 変更完了画面表示処理へのリダイレクトパス文字列
+	 * 処理5：変更登録処理(POST)
+	 * DBの変更対象データを取得し、画面からの入力値で上書きして更新を行います。セッションのログインユーザー情報も最新情報に同期
+	 * * @return "redirect:/client/user/update/complete" 変更完了画面 表示処理へのリダイレクト
 	 */
-	@PostMapping("/client/user/update/complete")
-	public String updateComplete(final HttpSession session) {
-		// セッションスコープから入力フォーム情報を取得
+	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.POST)
+	public String updateComplete() {
+		// セッション保持情報から入力値再取得
 		final UserForm userForm = (UserForm) session.getAttribute("userForm");
 		final UserBean loginUser = (UserBean) session.getAttribute("loginUser");
-
 		if (userForm == null || loginUser == null) {
-			return "redirect:/client/user/update/input";
+			// セッション情報がない場合、エラー
+			return "redirect:/syserror";
 		}
 
-		// 入力フォーム情報を元にDB登録用エンティティオブジェクトを生成（既存データを取得して上書き）
-		final User user = userRepository.findByIdAndDeleteFlag(loginUser.getId(), NOT_DELETED);
+		// 変更対象情報を取得
+		final User user = userRepository.findByIdAndDeleteFlag(userForm.getId(), NOT_DELETED);
 		if (user == null) {
-			return "common/error";
+			// 対象が無い場合、エラー
+			return "redirect:/syserror";
 		}
 
-		user.setEmail(userForm.getEmail());
-		user.setPassword(userForm.getPassword());
-		user.setName(userForm.getName());
-		user.setPostalCode(userForm.getPostalCode());
-		user.setAddress(userForm.getAddress());
-		user.setPhoneNumber(userForm.getPhoneNumber());
+		// 画面入力値以外の項目（削除フラグ、登録日）を退避
+		final Integer deleteFlag = user.getDeleteFlag();
+		final java.sql.Date insertDate = user.getInsertDate();
 
-		// DB更新実施
+		// 入力フォーム情報を変更用エンティティに設定
+		BeanUtils.copyProperties(userForm, user);
+
+		// 入力値以外の項目を再設定
+		user.setDeleteFlag(deleteFlag);
+		user.setInsertDate(insertDate);
+
+		// 情報を保存（UPDATE実行）
 		userRepository.save(user);
 
-		// セッションスコープの入力フォーム情報削除
-		session.removeAttribute("userForm");
-
-		// ログインユーザの会員変更の場合、セッションスコープの会員情報を更新
+		// ログインユーザ情報変更のため、セッション保存ユーザ情報（loginUser）をすべて最新に更新
 		loginUser.setEmail(user.getEmail());
 		loginUser.setName(user.getName());
 		loginUser.setPostalCode(user.getPostalCode());
@@ -198,18 +200,20 @@ public class ClientUserUpdateController {
 		loginUser.setPhoneNumber(user.getPhoneNumber());
 		session.setAttribute("loginUser", loginUser);
 
-		// 変更完了画面表示処理にリダイレクト
+		// 不要になった入力フォームセッション情報の削除
+		session.removeAttribute("userForm");
+
+		// 変更完了画面 表示処理へリダイレクト（二重送信防止）
 		return "redirect:/client/user/update/complete";
 	}
 
 	/**
-	 * 処理6：（変更完了画面表示処理）を行います。
-	 * 登録完了画面を表示します。
-	 * * @return 変更完了画面の表示用テンプレート名（フォワード）
+	 * 処理6：変更完了画面 表示処理(GET)
+	 * * @return "client/user/update_complete" 変更完了画面 表示（フォワード）
 	 */
-	@GetMapping("/client/user/update/complete")
+	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.GET)
 	public String updateCompleteView() {
-		// 登録完了画面表示（フォワード）
+		// 変更完了画面 表示
 		return "client/user/update_complete";
 	}
 }
