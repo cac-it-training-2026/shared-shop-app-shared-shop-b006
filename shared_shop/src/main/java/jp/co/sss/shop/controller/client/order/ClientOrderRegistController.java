@@ -3,7 +3,9 @@ package jp.co.sss.shop.controller.client.order;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,54 +113,70 @@ public class ClientOrderRegistController {
 
 	@RequestMapping(path = "/client/order/check", method = RequestMethod.GET)
 	public String orderCheck(Model model) {
+
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
 		model.addAttribute("orderForm", orderForm);
 
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
-		
-		if (basketList == null || basketList.isEmpty()) {
-			model.addAttribute("orderItemBeans", null);
-			return "client/order/check";
-		}
 
 		List<String> itemNameListLessThan = new ArrayList<>();
 		List<String> itemNameListZero = new ArrayList<>();
 
 		for (int i = basketList.size() - 1; i >= 0; i--) {
+
 			BasketBean basketBean = basketList.get(i);
 			Item item = itemRepository.findById(basketBean.getId()).orElse(null);
 
 			if (item == null || item.getStock() == 0) {
+
 				itemNameListZero.add(basketBean.getName());
 				basketList.remove(i);
+
 			} else if (item.getStock() < basketBean.getOrderNum()) {
+
 				itemNameListLessThan.add(basketBean.getName());
 				basketBean.setOrderNum(item.getStock());
 			}
 		}
-		
+
 		if (!itemNameListLessThan.isEmpty()) {
 			model.addAttribute("itemNameListLessThan", itemNameListLessThan);
 		}
+
 		if (!itemNameListZero.isEmpty()) {
 			model.addAttribute("itemNameListZero", itemNameListZero);
 		}
-		
+
 		session.setAttribute("basketBeans", basketList);
 
-		if (basketList.isEmpty()) {
-			model.addAttribute("orderItemBeans", null);
-		} else {
-			int sum = 0;
-			for (BasketBean basketBean : basketList) {
-				Item item = itemRepository.getReferenceById(basketBean.getId());
-				sum += basketBean.getOrderNum() * item.getPrice();
-			}
-			model.addAttribute("orderItemBeans", basketList);
-			model.addAttribute("total", sum);
+		List<Map<String, Object>> orderItemBeans = new ArrayList<>();
+
+		Integer sum = 0;
+
+		for (BasketBean basketBean : basketList) {
+
+			Item item = itemRepository.getReferenceById(basketBean.getId());
+
+			Map<String, Object> orderItem = new HashMap<>();
+
+			orderItem.put("name", item.getName());
+			orderItem.put("image", item.getImage());
+			orderItem.put("price", item.getPrice());
+			orderItem.put("orderNum", basketBean.getOrderNum());
+
+			Integer subtotal = item.getPrice() * basketBean.getOrderNum();
+
+			orderItem.put("subtotal", subtotal);
+
+			orderItemBeans.add(orderItem);
+
+			sum += subtotal;
 		}
-		
+
+		model.addAttribute("orderItemBeans", orderItemBeans);
+		model.addAttribute("total", sum);
+
 		return "client/order/check";
 	}
 
@@ -169,6 +187,7 @@ public class ClientOrderRegistController {
 
 	@RequestMapping(path = "/client/order/complete", method = RequestMethod.POST)
 	public String orderComplete(OrderForm form) {
+
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
 
 		@SuppressWarnings("unchecked")
