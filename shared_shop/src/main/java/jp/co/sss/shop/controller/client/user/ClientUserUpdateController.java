@@ -16,8 +16,8 @@ import jp.co.sss.shop.form.UserForm;
 import jp.co.sss.shop.repository.UserRepository;
 
 /**
- * 一般会員の会員情報変更処理を制御するコントローラクラスです。
- * * @author SharedShop制作チーム
+ * 一般会員の会員情報変更処理を制御するコントローラクラス
+ * * 
  */
 @Controller
 public class ClientUserUpdateController {
