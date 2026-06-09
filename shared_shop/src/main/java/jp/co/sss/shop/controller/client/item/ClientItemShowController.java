@@ -46,11 +46,11 @@ public class ClientItemShowController {
 
 	/**
 	 * サイドバー表示用の共通処理
-	 * カテゴリリポジトリの既存メソッドに合わせて修正しました
+	 * カテゴリリポジトリの既存メソッドに合わせて修正
 	 */
 	@ModelAttribute("categories")
 	public List<Category> getCategories() {
-		// ⭕ 既存の「登録日降順でリスト取得するメソッド」を呼び出す
+		// 既存の「登録日降順でリスト取得するメソッド」を呼び出す
 		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(Constant.NOT_DELETED);
 	}
 
@@ -68,13 +68,40 @@ public class ClientItemShowController {
 		// 
 
 		// 未削除の「売れ筋順」の商品リストを取得
-		List<Item> itemList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
-		int sortType = 2; //初期値は売れ筋順("2")
+		List<Item> salesList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
+		List<Item> latestList = itemRepository.findByDeleteFlagOrderByInsertDateDesc(Constant.NOT_DELETED);
+		// 売れ筋商品用に「実際に購入された（注文数が1以上の）商品だけ」を入れるリストを用意
+		List<Item> purchasedSalesList = new java.util.ArrayList<>();
 
-		// もし売れ筋順の商品が1件もない場合は、バックアップとして「新着順」で取得
-		if (itemList == null || itemList.isEmpty()) {
-			itemList = itemRepository.findByDeleteFlagOrderByInsertDateDesc(Constant.NOT_DELETED);
-			sortType = 1; // 新着順("1")に切り替え
+		// 売れ筋リストを走査して、購入履歴がある商品だけをピックアップする
+		if (salesList != null) {
+			for (Item item : salesList) {
+				// 注文商品リストが存在し、かつ1件以上データがある（＝購入されたことがある）場合のみ追加
+				if (item.getOrderItemsList() != null && !item.getOrderItemsList().isEmpty()) {
+					purchasedSalesList.add(item);
+				}
+			}
+		}
+
+		List<Item> itemList;
+		int sortType = 2; // 初期値は売れ筋順(2)
+
+		// ───【3パターン条件分岐】───
+
+		// 判定A: 購入した商品がなく（絞り込みリストが空）、かつ登録されている商品情報も全くない場合
+		if (purchasedSalesList.isEmpty() && (latestList == null || latestList.isEmpty())) {
+			itemList = latestList; // 空のリスト（0件）をセット
+			sortType = 2; // タイトルは「売れ筋商品」
+		}
+		// 判定B: 購入した商品はないが、登録されている商品情報だけはある場合（新着順に切り替え）
+		else if (purchasedSalesList.isEmpty() && !latestList.isEmpty()) {
+			itemList = latestList; // 新着順の商品リスト（全件）をセット
+			sortType = 1; // タイトルは「新着商品」
+		}
+		// 判定C: 購入した商品がある場合（購入された商品だけをトップの売れ筋順に表示）
+		else {
+			itemList = purchasedSalesList; // 実際に購入された商品だけのリストをセット
+			sortType = 2; // タイトルは「売れ筋商品」
 		}
 
 		// 3. トップ画面の表示仕様に合わせて「最大10件」にリストを切り出す
