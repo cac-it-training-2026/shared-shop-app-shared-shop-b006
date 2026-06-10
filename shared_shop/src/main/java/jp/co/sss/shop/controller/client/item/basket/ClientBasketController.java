@@ -10,12 +10,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import jakarta.servlet.http.HttpSession;
 import jp.co.sss.shop.bean.BasketBean;
 import jp.co.sss.shop.entity.Item;
+import jp.co.sss.shop.form.LoginForm;
 import jp.co.sss.shop.repository.ItemRepository;
 
 /**
@@ -33,8 +35,22 @@ public class ClientBasketController {
 
 	//	買い物かごの中身の表示メソッド
 	@RequestMapping(path = "/client/basket/list")
-	String showBasket() {
+	String showBasket(@ModelAttribute LoginForm form, Model model) {
 
+		if (session.getAttribute("user") == null) {
+
+			return "redirect:/login";
+		}
+		model.addAttribute(
+				"itemNameListLessThan",
+				session.getAttribute("itemNameListLessThan"));
+
+		model.addAttribute(
+				"itemNameListZero",
+				session.getAttribute("itemNameListZero"));
+
+		session.removeAttribute("itemNameListLessThan");
+		session.removeAttribute("itemNameListZero");
 		return "client/basket/list";
 	}
 
@@ -45,6 +61,24 @@ public class ClientBasketController {
 
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
+		@SuppressWarnings("unchecked")
+		List<String> itemNameListZero = (List<String>) session.getAttribute("itemNameListZero");
+
+		if (itemNameListZero == null) {
+			itemNameListZero = new ArrayList<>();
+		} else {
+			itemNameListZero.clear();
+		}
+
+		for (Item item : itemRepository.findAll()) {
+			if (item.getStock() == 0) {
+				if (!itemNameListZero.contains(item.getName())) {
+					itemNameListZero.add(item.getName());
+				}
+			}
+		}
+
+		session.setAttribute("itemNameListZero", itemNameListZero);
 
 		// セッションになければ生成
 		if (basketList == null) {
@@ -59,18 +93,30 @@ public class ClientBasketController {
 
 			if (itemInBasket.getId().equals(id)) {
 
+				isExist = true;
 				basketBean = itemInBasket;
+
 				//				stockが0または注文に対してstockが足りない場合に在庫がないという表示をフロントで行うためのリクエストスコープへの登録
-				if (basketBean.getStock() == 0) {
-					model.addAttribute("itemNameListZero", basketBean.getName());
-				} else if (basketBean.getStock() < basketBean.getOrderNum() + 1) {
-					model.addAttribute("itemNameListLessThan", basketBean.getName());
+
+				if (basketBean.getStock() < basketBean.getOrderNum() + 1) {
+
+					@SuppressWarnings("unchecked")
+					List<String> itemNameListLessThan = (List<String>) session.getAttribute("itemNameListLessThan");
+
+					if (itemNameListLessThan == null) {
+						itemNameListLessThan = new ArrayList<>();
+					}
+
+					if (!itemNameListLessThan.contains(basketBean.getName())) {
+						itemNameListLessThan.add(basketBean.getName());
+					}
+
+					session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+
 				} else {
 					// 注文数を1増やす
 					basketBean.setOrderNum(
 							basketBean.getOrderNum() + 1);
-
-					isExist = true;
 				}
 				break;
 			}
@@ -80,27 +126,22 @@ public class ClientBasketController {
 		if (!isExist) {
 
 			Item item = itemRepository.getReferenceById(id);
-			if (item.getStock() == 0) {
-				model.addAttribute("itemNameListZero", item.getName());
-			} else {
-				basketBean = new BasketBean();
 
-				basketBean.setId(item.getId());
-				basketBean.setName(item.getName());
-				basketBean.setStock(item.getStock());
+			basketBean = new BasketBean();
 
-				basketBean.setOrderNum(1);
+			basketBean.setId(item.getId());
+			basketBean.setName(item.getName());
+			basketBean.setStock(item.getStock());
 
-				basketList.add(basketBean);
+			basketBean.setOrderNum(1);
 
-			}
-
+			basketList.add(basketBean);
 		}
 
 		// セッションへ保存
 		session.setAttribute("basketBeans", basketList);
-
 		return "redirect:/client/basket/list";
+
 	}
 
 	//	sessionに登録されているリストの中からIDを使用し該当商品の要素を削除する
