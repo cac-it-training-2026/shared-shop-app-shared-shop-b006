@@ -70,6 +70,7 @@ public class ClientBasketController {
 			itemNameListZero.clear();
 		}
 
+		//		在庫数が0の場合にメーっセージを出力するため在庫数0の商品名をスコープに登録する処理
 		for (Item item : itemRepository.findAll()) {
 			if (item.getStock() == 0) {
 				if (!itemNameListZero.contains(item.getName())) {
@@ -96,7 +97,7 @@ public class ClientBasketController {
 				isExist = true;
 				basketBean = itemInBasket;
 
-				//				stockが0または注文に対してstockが足りない場合に在庫がないという表示をフロントで行うためのリクエストスコープへの登録
+				//	注文に対してstockが足りない場合に在庫がないという表示をフロントで行うためのスコープへの登録
 
 				if (basketBean.getStock() < basketBean.getOrderNum() + 1) {
 
