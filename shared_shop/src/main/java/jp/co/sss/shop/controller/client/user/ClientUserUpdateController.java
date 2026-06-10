@@ -1,5 +1,7 @@
 package jp.co.sss.shop.controller.client.user;
 
+import java.sql.Date;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,46 +17,56 @@ import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.User;
 import jp.co.sss.shop.form.UserForm;
 import jp.co.sss.shop.repository.UserRepository;
+import jp.co.sss.shop.util.Constant;
 
 /**
- * 一般会員の会員情報変更処理を制御するコントローラクラス
+ * 会員管理 変更機能(一般会員用)のコントローラクラス
+ * * 
  */
 @Controller
 public class ClientUserUpdateController {
 
-	/** 未削除状態を表す定数（削除フラグ: 0） */
-	private static final int NOT_DELETED = 0;
-
-	/** ユーザー情報にアクセスするためのリポジトリ */
+	/**
+	 * 会員情報 リポジトリ
+	 */
 	@Autowired
-	private UserRepository userRepository;
-
-	/** セッション */
-	@Autowired
-	private HttpSession session;
+	UserRepository userRepository;
 
 	/**
-	 * 処理1：（変更ボタン 押下時処理）、（確認画面-戻るボタン 押下時処理）
-	 * * @return 変更入力画面表示処理へのリダイレクトパス文字列
+	 * セッション
+	 */
+	@Autowired
+	HttpSession session;
+
+	/**
+	 * 入力画面 初期表示処理(POST)
+	 * * 一般会員は自分自身の変更なので、URLの{id}は不要（セッションのuserから自分のIDを特定）
+	 * @return "redirect:/client/user/update/input" 入力画面 表示処理
 	 */
 	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.POST)
 	public String updateInput() {
+
+		// セッションスコープより入力情報を取り出す
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
-			final UserBean loginUser = (UserBean) session.getAttribute("loginUser");
+
+			// キー名「user」からログイン情報を取得する
+			UserBean loginUser = (UserBean) session.getAttribute("user");
 			if (loginUser == null) {
 				return "redirect:/login";
 			}
 
-			final User user = userRepository.findByIdAndDeleteFlag(loginUser.getId(), NOT_DELETED);
+			// 変更対象（自分自身）の情報取得
+			User user = userRepository.findByIdAndDeleteFlag(loginUser.getId(), Constant.NOT_DELETED);
 			if (user == null) {
 				return "redirect:/syserror";
 			}
 
+			// 初期表示用フォーム情報の生成
 			userForm = new UserForm();
-
 			BeanUtils.copyProperties(user, userForm);
 
+			// 変更入力フォームをセッションに保持
 			session.setAttribute("userForm", userForm);
 		}
 
@@ -62,19 +74,21 @@ public class ClientUserUpdateController {
 	}
 
 	/**
-	 * 処理2：（変更入力画面表示処理）
-	 * * @param model Viewとの値受渡し用のModelオブジェクト
-	 * @return 変更入力画面の表示用テンプレート名（フォワード）
+	 * 入力画面 表示処理
+	 *
+	 * @param model Viewとの値受渡し
+	 * @return "client/user/update_input" 変更入力画面 表示
 	 */
 	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.GET)
-	public String updateInputView(final Model model) {
-		final UserForm userForm = (UserForm) session.getAttribute("userForm");
+	public String updateInputView(Model model) {
+
+		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
 			return "redirect:/syserror";
 		}
 		model.addAttribute("userForm", userForm);
 
-		final BindingResult result = (BindingResult) session.getAttribute("result");
+		BindingResult result = (BindingResult) session.getAttribute("result");
 		if (result != null) {
 			model.addAttribute("org.springframework.validation.BindingResult.userForm", result);
 			session.removeAttribute("result");
@@ -84,24 +98,25 @@ public class ClientUserUpdateController {
 	}
 
 	/**
-	 * 処理3：（確認ボタン 押下時処理）
-	 * * @param userForm 画面から入力されたユーザー情報のフォームオブジェクト
-	 * @param result 入力チェック結果
-	 * @return 次の処理ステップに対応するリダイレクトパス文字列
+	 * 変更確認処理
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.POST)
-	public String updateCheck(@Valid @ModelAttribute final UserForm userForm, final BindingResult result) {
-		final UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
+	public String updateCheck(@Valid @ModelAttribute UserForm form, BindingResult result) {
+
+		UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
 		if (lastUserForm == null) {
 			return "redirect:/syserror";
 		}
 
-		// 画面のhidden等から届いた権限を保持。万が一無ければ直前のセッションから補填
-		if (userForm.getAuthority() == null) {
-			userForm.setAuthority(lastUserForm.getAuthority());
+		// 権限や会員IDがない場合、セッション情報から値をセット（不足の補填）
+		if (form.getAuthority() == null) {
+			form.setAuthority(lastUserForm.getAuthority());
+		}
+		if (form.getId() == null) {
+			form.setId(lastUserForm.getId());
 		}
 
-		session.setAttribute("userForm", userForm);
+		session.setAttribute("userForm", form);
 
 		if (result.hasErrors()) {
 			session.setAttribute("result", result);
@@ -112,13 +127,11 @@ public class ClientUserUpdateController {
 	}
 
 	/**
-	 * 処理4：（変更確認画面表示処理）
-	 * * @param model Viewとの値受渡し用のModelオブジェクト
-	 * @return 変更確認画面の表示用テンプレート名（フォワード）
+	 * 確認画面 表示処理
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.GET)
-	public String updateCheckView(final Model model) {
-		final UserForm userForm = (UserForm) session.getAttribute("userForm");
+	public String updateCheckView(Model model) {
+		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
 			return "redirect:/syserror";
 		}
@@ -128,24 +141,23 @@ public class ClientUserUpdateController {
 	}
 
 	/**
-	 * 処理5：（登録ボタン 押下時処理）
-	 * * @return 変更完了画面表示処理へのリダイレクトパス文字列
+	 * 変更登録、完了画面表示処理
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.POST)
 	public String updateComplete() {
-		final UserForm userForm = (UserForm) session.getAttribute("userForm");
-		final UserBean loginUser = (UserBean) session.getAttribute("loginUser");
-		if (userForm == null || loginUser == null) {
+
+		UserForm userForm = (UserForm) session.getAttribute("userForm");
+		if (userForm == null) {
 			return "redirect:/syserror";
 		}
 
-		final User user = userRepository.findByIdAndDeleteFlag(userForm.getId(), NOT_DELETED);
+		User user = userRepository.findByIdAndDeleteFlag(userForm.getId(), Constant.NOT_DELETED);
 		if (user == null) {
 			return "redirect:/syserror";
 		}
 
-		final Integer deleteFlag = user.getDeleteFlag();
-		final java.sql.Date insertDate = user.getInsertDate();
+		Integer deleteFlag = user.getDeleteFlag();
+		Date insertDate = user.getInsertDate();
 
 		BeanUtils.copyProperties(userForm, user);
 
@@ -154,12 +166,13 @@ public class ClientUserUpdateController {
 
 		userRepository.save(user);
 
-		loginUser.setEmail(user.getEmail());
-		loginUser.setName(user.getName());
-		loginUser.setPostalCode(user.getPostalCode());
-		loginUser.setAddress(user.getAddress());
-		loginUser.setPhoneNumber(user.getPhoneNumber());
-		session.setAttribute("loginUser", loginUser);
+		// キー名「user」内のログインセッション情報を最新状態に同期する処理
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser != null && loginUser.getId().equals(userForm.getId())) {
+
+			BeanUtils.copyProperties(user, loginUser);
+		}
+		session.setAttribute("user", loginUser);
 
 		session.removeAttribute("userForm");
 
@@ -167,8 +180,7 @@ public class ClientUserUpdateController {
 	}
 
 	/**
-	 * 処理6：（変更完了画面表示処理）
-	 * * @return 変更完了画面の表示用テンプレート名（フォワード）
+	 * 変更完了画面 表示
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.GET)
 	public String updateCompleteView() {
