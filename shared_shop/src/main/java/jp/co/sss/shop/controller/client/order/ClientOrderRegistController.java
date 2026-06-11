@@ -190,8 +190,10 @@ public class ClientOrderRegistController {
 			sum += subtotal;
 		}
 
-		model.addAttribute("orderItemBeans", orderItemBeans);
-		model.addAttribute("total", sum);
+		if (basketList.size() != 0) {
+			model.addAttribute("orderItemBeans", orderItemBeans);
+			model.addAttribute("total", sum);
+		}
 
 		return "client/order/check";
 	}
