@@ -133,15 +133,13 @@ public class ClientOrderRegistController {
 		List<String> itemNameListZero = new ArrayList<>();
 
 		//		買い物かご内の商品と最新のストック情報と照合し買い物かご内の商品を更新する
-		for (int i = basketList.size() - 1; i >= 0; i--) {
+		for (BasketBean basketBean : basketList) {
 
-			BasketBean basketBean = basketList.get(i);
 			Item item = itemRepository.findById(basketBean.getId()).orElse(null);
 
 			if (item == null || item.getStock() == 0) {
 
 				itemNameListZero.add(basketBean.getName());
-				basketList.remove(i);
 
 			} else if (item.getStock() < basketBean.getOrderNum()) {
 
@@ -149,6 +147,11 @@ public class ClientOrderRegistController {
 				basketBean.setOrderNum(item.getStock());
 			}
 		}
+
+		basketList.removeIf(basketBean -> {
+			Item item = itemRepository.findById(basketBean.getId()).orElse(null);
+			return item == null || item.getStock() == 0;
+		});
 
 		if (!itemNameListLessThan.isEmpty()) {
 			model.addAttribute("itemNameListLessThan", itemNameListLessThan);
