@@ -46,7 +46,6 @@ public class ClientItemShowController {
 
 	/**
 	 * サイドバー表示用の共通処理
-	 * カテゴリリポジトリの既存メソッドに合わせて修正
 	 */
 	@ModelAttribute("categories")
 	public List<Category> getCategories() {
@@ -62,10 +61,6 @@ public class ClientItemShowController {
 	 */
 	@RequestMapping(path = "/", method = { RequestMethod.GET, RequestMethod.POST })
 	public String index(Model model) {
-
-		/*TODO 現在は全件表示を行っている
-		 * これを売れ筋（注文回数が多い順）に改修する*/
-		// 
 
 		// 未削除の「売れ筋順」の商品リストを取得
 		List<Item> salesList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
