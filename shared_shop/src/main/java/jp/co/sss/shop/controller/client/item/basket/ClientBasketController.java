@@ -66,10 +66,7 @@ public class ClientBasketController {
 
 		if (itemNameListZero == null) {
 			itemNameListZero = new ArrayList<>();
-		} else {
-			itemNameListZero.clear();
 		}
-
 		//		在庫数が0の場合にメーっセージを出力するため在庫数0の商品名をスコープに登録する処理
 		for (Item item : itemRepository.findAll()) {
 			if (item.getStock() == 0) {
@@ -150,13 +147,9 @@ public class ClientBasketController {
 	String deleteBasket(Integer id) {
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
-		for (int i = 0; i < basketList.size(); i++) {
 
-			if (basketList.get(i).getId().equals(id)) {
-				basketList.remove(i);
-				break;
-			}
-		}
+		basketList.removeIf(basketBean -> basketBean.getId().equals(id));
+
 		//		リストの中身が0の場合でもNullにはならないため買い物かごが空という表示を行うためsessionの削除を行う
 		if (basketList.size() == 0) {
 			session.removeAttribute("basketBeans");
