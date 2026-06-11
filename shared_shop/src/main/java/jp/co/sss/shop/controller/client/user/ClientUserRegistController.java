@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.User;
 import jp.co.sss.shop.form.UserForm;
 import jp.co.sss.shop.repository.UserRepository;
@@ -152,8 +153,14 @@ public class ClientUserRegistController {
 		user.setPhoneNumber(userForm.getPhoneNumber());
 		user.setAuthority(userForm.getAuthority());
 		userRepository.save(user);
+
+		UserBean userBean = new UserBean();
+		userBean.setId(user.getId());
+		userBean.setName(user.getName());
+		userBean.setAuthority(user.getAuthority());
+
 		session.removeAttribute("userForm");
-		session.setAttribute("user", user);
+		session.setAttribute("user", userBean);
 		return "redirect:/client/user/regist/complete";
 	}
 
