@@ -2,6 +2,7 @@ package jp.co.sss.shop.controller.client.order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -70,8 +71,9 @@ public class ClientOrderShowController {
 			return "redirect:/login";
 		}
 
-		// ログインユーザーのIDに紐づく注文情報のみを取得(注文日降順、注文ID降順)
-		Page<Order> orderList = orderRepository.findByUserIdOrderByInsertDateDescIdDesc(loginUser.getId(), pageable);
+		// メソッドを呼び出し、現在のカート(NULL)を除外した「確定済みの注文履歴」のみを取得
+		Page<Order> orderList = orderRepository
+				.findByUserIdAndPayMethodIsNotNullOrderByInsertDateDescIdDesc(loginUser.getId(), pageable);
 
 		// 注文情報リストを生成
 		List<OrderBean> orderBeanList = new ArrayList<OrderBean>();
@@ -112,13 +114,16 @@ public class ClientOrderShowController {
 			return "redirect:/login";
 		}
 
-		// 選択された注文情報に該当する情報を取得
-		Order order = orderRepository.getReferenceById(id);
+		// 変更点：リポジトリのメソッドを使い、「注文ID」「ユーザーID」「支払方法が存在する（確定済）」の3条件で取得
+		Optional<Order> orderOpt = orderRepository.findByIdAndUserIdAndPayMethodIsNotNull(id, loginUser.getId());
 
-		// 【安全対策】対象の注文データが存在しない、または「他人の注文データ」だった場合はシステムエラーへ飛ばす
-		if (order == null || order.getUser() == null || !order.getUser().getId().equals(loginUser.getId())) {
+		// 変更点：データが存在しない（他人のデータ、カート状態、または存在しないID）場合は安全にシステムエラーへ飛ばす
+		if (orderOpt.isEmpty()) {
 			return "redirect:/syserror";
 		}
+
+		// Optionalからエンティティを取り出す
+		Order order = orderOpt.get();
 
 		// 表示する注文情報を生成
 		OrderBean orderBean = beanTools.copyEntityToOrderBean(order);
