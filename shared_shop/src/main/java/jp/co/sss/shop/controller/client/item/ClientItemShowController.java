@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,14 +43,14 @@ public class ClientItemShowController {
 	@Autowired
 	BeanTools beanTools;
 
-	/**
-	 * サイドバー表示用の共通処理
-	 */
-	@ModelAttribute("categories")
-	public List<Category> getCategories() {
-		// 既存の「登録日降順でリスト取得するメソッド」を呼び出す
-		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(Constant.NOT_DELETED);
-	}
+	//	/**
+	//	 * サイドバー表示用の共通処理
+	//	 */
+	//	@ModelAttribute("categories")
+	//	public List<Category> getCategories() {
+	//		// 既存の「登録日降順でリスト取得するメソッド」を呼び出す
+	//		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(Constant.NOT_DELETED);
+	//	}
 
 	/**
 	 * トップ画面 表示処理
@@ -174,5 +173,20 @@ public class ClientItemShowController {
 		ItemBean itemBean = beanTools.copyEntityToItemBean(item);
 		model.addAttribute("item", itemBean);
 		return "client/item/detail";
+	}
+}
+
+@org.springframework.web.bind.annotation.ControllerAdvice
+class CommonControllerAdvice {
+
+	@Autowired
+	jp.co.sss.shop.repository.CategoryRepository categoryRepository;
+
+	/**
+	 * システム内のすべての画面にカテゴリリストを配信します
+	 */
+	@org.springframework.web.bind.annotation.ModelAttribute("categories")
+	public List<Category> getCategories() {
+		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(jp.co.sss.shop.util.Constant.NOT_DELETED);
 	}
 }
