@@ -46,15 +46,15 @@ public class ClientUserUpdateController {
 	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.POST)
 	public String updateInput() {
 
+		// 【共通】セッション切れ（未ログイン）チェック
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser == null) {
+			return "redirect:/login";
+		}
+
 		// セッションスコープより入力情報を取り出す
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
-
-			// キー名「user」からログイン情報を取得する
-			UserBean loginUser = (UserBean) session.getAttribute("user");
-			if (loginUser == null) {
-				return "redirect:/login";
-			}
 
 			// 変更対象（自分自身）の情報取得
 			User user = userRepository.findByIdAndDeleteFlag(loginUser.getId(), Constant.NOT_DELETED);
@@ -82,10 +82,15 @@ public class ClientUserUpdateController {
 	@RequestMapping(path = "/client/user/update/input", method = RequestMethod.GET)
 	public String updateInputView(Model model) {
 
+		if (session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
+
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
 			return "redirect:/syserror";
 		}
+
 		model.addAttribute("userForm", userForm);
 
 		BindingResult result = (BindingResult) session.getAttribute("result");
@@ -102,6 +107,10 @@ public class ClientUserUpdateController {
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.POST)
 	public String updateCheck(@Valid @ModelAttribute UserForm form, BindingResult result) {
+
+		if (session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
 
 		UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
 		if (lastUserForm == null) {
@@ -131,6 +140,10 @@ public class ClientUserUpdateController {
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.GET)
 	public String updateCheckView(Model model) {
+		if (session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
+
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
 			return "redirect:/syserror";
@@ -145,6 +158,12 @@ public class ClientUserUpdateController {
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.POST)
 	public String updateComplete() {
+
+		// 【共通】セッション切れ（未ログイン）チェック
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser == null) {
+			return "redirect:/login";
+		}
 
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
@@ -167,9 +186,7 @@ public class ClientUserUpdateController {
 		userRepository.save(user);
 
 		// キー名「user」内のログインセッション情報を最新状態に同期する処理
-		UserBean loginUser = (UserBean) session.getAttribute("user");
-		if (loginUser != null && loginUser.getId().equals(userForm.getId())) {
-
+		if (loginUser.getId().equals(userForm.getId())) {
 			BeanUtils.copyProperties(user, loginUser);
 		}
 		session.setAttribute("user", loginUser);
@@ -184,6 +201,10 @@ public class ClientUserUpdateController {
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.GET)
 	public String updateCompleteView() {
+
+		if (session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
 		return "client/user/update_complete";
 	}
 }
