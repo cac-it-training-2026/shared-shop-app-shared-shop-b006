@@ -103,13 +103,12 @@ public class ClientUserRegistController {
 			BindingResult result) {
 		UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
 		if (lastUserForm == null) {
-			return "redirect:/syserror";
+			return "redirect:/login";
 		}
 		if (userForm.getAuthority() == null) {
 			userForm.setAuthority(lastUserForm.getAuthority());
 		}
 		session.setAttribute("userForm", userForm);
-		session.setAttribute("result", result);
 		if (result.hasErrors()) {
 			return "redirect:/client/user/regist/input";
 		} else {
@@ -142,7 +141,7 @@ public class ClientUserRegistController {
 	public String registComplete(final HttpSession session) {
 		UserForm userForm = (UserForm) session.getAttribute("userForm");
 		if (userForm == null) {
-			return "redirect:/syserror";
+			return "redirect:/login";
 		}
 		User user = new User();
 		user.setEmail(userForm.getEmail());
@@ -169,8 +168,11 @@ public class ClientUserRegistController {
 	 * @return　会員登録完了画面
 	 */
 	@GetMapping(path = "/client/user/regist/complete")
-	public String registCompleteView() {
-
+	public String registCompleteView(final HttpSession session) {
+		UserBean userForm = (UserBean) session.getAttribute("user");
+		if (userForm == null) {
+			return "redirect:/login";
+		}
 		return "client/user/regist_complete";
 	}
 }
