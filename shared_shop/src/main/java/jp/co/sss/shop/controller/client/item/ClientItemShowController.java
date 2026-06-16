@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletRequest; // リンク元判定用
+import jakarta.servlet.http.HttpSession; // セッション判定用
 import jp.co.sss.shop.bean.ItemBean;
 import jp.co.sss.shop.entity.Category;
 import jp.co.sss.shop.entity.Item;
@@ -59,7 +61,11 @@ public class ClientItemShowController {
 	 * @return "index" トップ画面
 	 */
 	@RequestMapping(path = "/", method = { RequestMethod.GET, RequestMethod.POST })
-	public String index(Model model) {
+	public String index(Model model, HttpSession session) {
+		// 追加：セッション切れ（タイムアウト）のチェック
+		if (session == null || session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
 
 		// 未削除の「売れ筋順」の商品リストを取得
 		List<Item> salesList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
@@ -120,9 +126,51 @@ public class ClientItemShowController {
 	 * @param model Viewとの値受渡し
 	 * @return "client/item/list" 商品一覧画面
 	 */
-	@RequestMapping(path = "/client/item/list/{sortType}", method = { RequestMethod.GET, RequestMethod.POST })
-	public String showItemList(@PathVariable int sortType,
-			@RequestParam(name = "categoryId", required = false) Integer categoryId, Model model) {
+	@RequestMapping(path = { "/client/item/list", "/client/item/list/{sortType}" }, method = { RequestMethod.GET,
+			RequestMethod.POST })
+	public String showItemList(
+			@PathVariable(name = "sortType", required = false) Integer sortType,
+			@RequestParam(name = "categoryId", required = false) Integer categoryId,
+			Model model,
+			HttpServletRequest request,
+			HttpSession session) {
+
+		// 追加：セッション切れ（タイムアウト）のチェック
+		if (session == null || session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
+
+		// 初期表示および外部遷移の判定（画面のハードコーディング対策）
+		String referer = request.getHeader("Referer");
+		boolean isInitialEntry = (sortType == null) ||
+				(sortType == 1 && (referer == null || !referer.contains("/client/item/list")));
+
+		if (isInitialEntry) {
+			// 全商材の注文履歴の有無を確認
+			List<Item> allItems = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
+			boolean hasOrderHistory = false;
+
+			if (allItems != null) {
+				for (Item item : allItems) {
+					if (item.getOrderItemsList() != null && !item.getOrderItemsList().isEmpty()) {
+						hasOrderHistory = true;
+						break;
+					}
+				}
+			}
+
+			// 注文履歴がある場合は売れ筋順(2)、ない場合は新着順(1)に決定
+			int targetSort = hasOrderHistory ? 2 : 1;
+
+			// 指定されたソート順と異なる場合は自动リダイレクトを行う
+			if (sortType == null || sortType != targetSort) {
+				String redirectUrl = "redirect:/client/item/list/" + targetSort;
+				if (categoryId != null) {
+					redirectUrl += "?categoryId=" + categoryId;
+				}
+				return redirectUrl;
+			}
+		}
 
 		//プルダウンで「指定なし(0)」が選ばれた場合は、カテゴリ指定なし(null)に変換する
 		if (categoryId != null && categoryId == 0) {
@@ -165,7 +213,12 @@ public class ClientItemShowController {
 	 * 詳細表示処理
 	 */
 	@RequestMapping(path = "/client/item/detail/{id}")
-	public String showItem(@PathVariable int id, Model model) {
+	public String showItem(@PathVariable int id, Model model, HttpSession session) {
+		// 追加：セッション切れ（タイムアウト）のチェック
+		if (session == null || session.getAttribute("user") == null) {
+			return "redirect:/login";
+		}
+
 		Item item = itemRepository.findByIdAndDeleteFlag(id, Constant.NOT_DELETED);
 		if (item == null) {
 			return "redirect:/syserror";
