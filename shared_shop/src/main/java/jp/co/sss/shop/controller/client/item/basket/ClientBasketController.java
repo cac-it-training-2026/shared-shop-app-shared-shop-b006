@@ -50,7 +50,6 @@ public class ClientBasketController {
 				session.getAttribute("itemNameListZero"));
 
 		session.removeAttribute("itemNameListLessThan");
-		session.removeAttribute("itemNameListZero");
 		return "client/basket/list";
 	}
 
@@ -148,15 +147,26 @@ public class ClientBasketController {
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
 
-		basketList.removeIf(basketBean -> basketBean.getId().equals(id));
+		for (BasketBean basket : basketList) {
+			if (basket.getId() == id) {
+				if (basket.getOrderNum() >= 1) {
+					basket.setOrderNum(basket.getOrderNum() - 1);
+				}
+
+			}
+
+		}
+		basketList.removeIf(basketBean -> basketBean.getId().equals(id) && basketBean.getOrderNum() < 1);
 
 		//		リストの中身が0の場合でもNullにはならないため買い物かごが空という表示を行うためsessionの削除を行う
 		if (basketList.size() == 0) {
 			session.removeAttribute("basketBeans");
 			return "redirect:/client/basket/list";
+		} else {
+			session.setAttribute("basketBeans", basketList);
+			return "redirect:/client/basket/list";
 		}
-		session.setAttribute("basketBeans", basketList);
-		return "redirect:/client/basket/list";
+
 	}
 
 	//	sessionの削除を行い買い物かごを空にする
