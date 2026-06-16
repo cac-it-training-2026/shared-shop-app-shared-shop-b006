@@ -32,6 +32,10 @@ public class ClientUserShowController {
 	public String userDtail(HttpSession session, Model model) {
 		UserBean userBean = (UserBean) session.getAttribute("user");
 
+		if (userBean == null) {
+			return "redirect:/login";
+		}
+
 		User loginUserDetail = userRepository.getReferenceById(userBean.getId());
 
 		userBean.setEmail(loginUserDetail.getEmail());
