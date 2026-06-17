@@ -29,9 +29,9 @@ public class ClientUserRegistController {
 	 * 処理１：会員登録画面の初期化を行います。
 	 * 一般会員権限を設定した上で、会員情報入力用フォームを生成。
 	 * セッションスコープに保存し、入力画面へリダイレクト
-	 * 
-	 * @param session　セッション情報
-	 * @return　会員登録入力画面へのリダイレクト先
+	 * @author :加藤拓海
+	 * @param:session　セッション情報
+	 * @return:会員登録入力画面へのリダイレクト先
 	 */
 	@GetMapping("/client/user/regist/input/init")
 	public String registInputInit(final HttpSession session) {
@@ -48,7 +48,7 @@ public class ClientUserRegistController {
 	 * 処理２：会員登録画面への遷移処理を行う。（input/initとは入口が違う）
 	 * セッション内に入力フォーム情報が存在しない場合は
 	 * 新規作成して一般会員権限を設定し、入力画面へリダイレクト
-	 * 
+	 * @author :加藤拓海
 	 * @param session　セッション情報
 	 * @return　会員登録入力画面へのリダイレクト先
 	 */
@@ -68,9 +68,10 @@ public class ClientUserRegistController {
 	/**処理３：会員登録入力画面を表示する処理。
 	 * セッションに保持している入力内容および
 	 * バリデーション結果をモデルに設定
+	 * @author :加藤拓海
 	 * @param model　ビューに渡すモデル
 	 * @param session　セッション情報
-	 * @return　会員登録入力画面
+	 * @return:会員登録入力画面
 	 */
 	@GetMapping(path = "/client/user/regist/input")
 	public String registInputView(final Model model, final HttpSession session) {
@@ -93,6 +94,7 @@ public class ClientUserRegistController {
 	 * 処理４：入力内容のバリデーションを実施し、確認画面への遷移判定を行う。
 	 * 入力内容をセッションに保存し、入力エラーが存在する場合は入力画面へ
 	 * 存在しない場合は確認画面へリダイレクト
+	 * @author :加藤拓海
 	 * @param session　セッション情報
 	 * @param userForm　会員情報入力フォーム
 	 * @param result　バリデーション結果
@@ -119,6 +121,7 @@ public class ClientUserRegistController {
 	/**
 	 * 会員登録確認画面を表示。
 	 * セッションに保持している内容をモデルへ設定
+	 * @author :加藤拓海
 	 * @param model　ビューへ渡すモデル
 	 * @param session　セッション情報
 	 * @return　会員登録確認画面
@@ -134,6 +137,7 @@ public class ClientUserRegistController {
 	 * 会員情報の登録を行う。
 	 * セッションに保持している内容をエンティティへ移し替え、データベースへ登録。
 	 * 登録後は入力フォーム情報を削除し、登録した会員情報をセッションで受け取る。
+	 * @author :加藤拓海
 	 * @param session　セッション情報
 	 * @return　登録完了表示処理へ
 	 */
