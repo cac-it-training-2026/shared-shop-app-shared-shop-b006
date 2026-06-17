@@ -20,11 +20,16 @@ public class ClientUserShowController {
 	/**
 	 * 会員詳細表示
 	 * セッションに保持されているログインユーザ情報を元に、
-	 * DBから最新のユーザ情報を取得し、UserBeanに設定して画面へ渡す。
+	 * DBから最新のユーザ情報を取得し、UserBeanに設定し画面へ渡す。
+	 * セッションタイムアウトが起こった際はログイン画面に遷移
+	 * 
+	 * 
 	 *
+	 * @author 清水美根瑠
 	 * @param session ログイン情報保持
 	 * @param model Viewとの値受渡し
-	 * @return clitent/user/detailで会員詳細表示画面へ
+	 * @return clitent/user/detail会員詳細表示画面（client/user/detail）
+	 *	       タイムアウト時はログイン画面（redirect:/login）
 	 * 
 	 * 
 	 */
