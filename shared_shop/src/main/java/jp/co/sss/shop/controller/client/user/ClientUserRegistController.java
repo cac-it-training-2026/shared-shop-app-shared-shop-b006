@@ -107,6 +107,7 @@ public class ClientUserRegistController {
 		}
 		session.setAttribute("userForm", userForm);
 		if (result.hasErrors()) {
+			//If文内へ移動
 			session.setAttribute("result", result);
 			return "redirect:/client/user/regist/input";
 		} else {
