@@ -62,10 +62,6 @@ public class ClientItemShowController {
 	 */
 	@RequestMapping(path = "/", method = { RequestMethod.GET, RequestMethod.POST })
 	public String index(Model model, HttpSession session) {
-		// 追加：セッション切れ（タイムアウト）のチェック
-		if (session == null || session.getAttribute("user") == null) {
-			return "redirect:/login";
-		}
 
 		// 未削除の「売れ筋順」の商品リストを取得
 		List<Item> salesList = itemRepository.findByDeleteFlagOrderBySalesDesc(Constant.NOT_DELETED);
@@ -134,11 +130,6 @@ public class ClientItemShowController {
 			Model model,
 			HttpServletRequest request,
 			HttpSession session) {
-
-		// 追加：セッション切れ（タイムアウト）のチェック
-		if (session == null || session.getAttribute("user") == null) {
-			return "redirect:/login";
-		}
 
 		// 初期表示および外部遷移の判定（画面のハードコーディング対策）
 		String referer = request.getHeader("Referer");
@@ -214,10 +205,6 @@ public class ClientItemShowController {
 	 */
 	@RequestMapping(path = "/client/item/detail/{id}")
 	public String showItem(@PathVariable int id, Model model, HttpSession session) {
-		// 追加：セッション切れ（タイムアウト）のチェック
-		if (session == null || session.getAttribute("user") == null) {
-			return "redirect:/login";
-		}
 
 		Item item = itemRepository.findByIdAndDeleteFlag(id, Constant.NOT_DELETED);
 		if (item == null) {

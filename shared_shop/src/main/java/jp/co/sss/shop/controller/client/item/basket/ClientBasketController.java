@@ -38,9 +38,23 @@ public class ClientBasketController {
 	String showBasket(@ModelAttribute LoginForm form, Model model) {
 
 		if (session.getAttribute("user") == null) {
-
 			return "redirect:/login";
 		}
+
+		@SuppressWarnings("unchecked")
+		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
+
+		// 買い物かごが空なら、在庫不足系のメッセージを出さない
+		if (basketList == null || basketList.size() == 0) {
+			session.removeAttribute("itemNameListZero");
+			session.removeAttribute("itemNameListLessThan");
+
+			model.addAttribute("itemNameListZero", null);
+			model.addAttribute("itemNameListLessThan", null);
+
+			return "client/basket/list";
+		}
+
 		model.addAttribute(
 				"itemNameListLessThan",
 				session.getAttribute("itemNameListLessThan"));
@@ -52,7 +66,6 @@ public class ClientBasketController {
 		session.removeAttribute("itemNameListLessThan");
 		return "client/basket/list";
 	}
-
 	//	買い物かごへの追加と在庫数の確認を行うメソッド
 
 	@RequestMapping(path = "/client/basket/add", method = RequestMethod.POST)
