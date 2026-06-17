@@ -56,7 +56,8 @@ public class ClientItemShowController {
 
 	/**
 	 * トップ画面 表示処理
-	 *
+	 * 
+	 * @author 近藤灯
 	 * @param model    Viewとの値受渡し
 	 * @return "index" トップ画面
 	 */
@@ -228,6 +229,14 @@ public class ClientItemShowController {
 		return "client/item/detail";
 	}
 }
+
+/**
+ * 全画面共通で使用するデータをModelへ設定するクラス。
+ * サイドバーに表示するカテゴリ一覧を取得し、
+ * 「categories」として全画面へ配信する。
+ *
+ * @author 近藤灯
+ */
 
 @org.springframework.web.bind.annotation.ControllerAdvice
 class CommonControllerAdvice {
