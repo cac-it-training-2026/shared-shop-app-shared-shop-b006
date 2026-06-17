@@ -32,7 +32,7 @@ import jp.co.sss.shop.repository.UserRepository;
 
 /**
 * 注文機能を実装するコントローラー
-* 
+* @author 高戸
 */
 @Controller
 
@@ -54,6 +54,9 @@ public class ClientOrderRegistController {
 	OrderItemRepository orderItemRepository;
 
 	//	届け先住所の登録と入力フォームに表示する初期値の設定を行う
+	/**
+	 * @return
+	 */
 	@RequestMapping(path = "/client/order/address/input", method = RequestMethod.POST)
 	public String addressInput() {
 		if (session.getAttribute("user") == null) {
@@ -76,6 +79,11 @@ public class ClientOrderRegistController {
 	}
 
 	//	入力チェックと入力画面の表示を行う
+	/**
+	 * @param form
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(path = "/client/order/address/input", method = RequestMethod.GET)
 	public String addressInput(@ModelAttribute("orderForm") OrderForm form, Model model) {
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
@@ -97,6 +105,11 @@ public class ClientOrderRegistController {
 	}
 
 	//	届け先入力からの遷移時に入力にエラーがある場合はその内容をsessionに保存し届け先入力画面にredirect
+	/**
+	 * @param form
+	 * @param result
+	 * @return
+	 */
 	@RequestMapping(path = "/client/order/payment/input", method = RequestMethod.POST)
 	public String paymentInput(@Validated @ModelAttribute("orderForm") OrderForm form, BindingResult result) {
 		if (session.getAttribute("user") == null) {
@@ -113,6 +126,10 @@ public class ClientOrderRegistController {
 	}
 
 	//	支払方法選択画面の表示値のリクエストスコープへの登録
+	/**
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(path = "/client/order/payment/input", method = RequestMethod.GET)
 	public String paymentInput(Model model) {
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
@@ -127,6 +144,10 @@ public class ClientOrderRegistController {
 	}
 
 	//	入力された支払方法をセッション内の注文情報に登録し注文確認画面にGet通信
+	/**
+	 * @param form
+	 * @return redirect:/client/order/check
+	 */
 	@RequestMapping(path = "/client/order/check", method = RequestMethod.POST)
 	public String orderCheck(OrderForm form) {
 		if (session.getAttribute("user") == null) {
@@ -140,6 +161,10 @@ public class ClientOrderRegistController {
 	}
 
 	//	注文確認画面の表示と金額の計算
+	/**
+	 * @param model
+	 * @return client/order/check
+	 */
 	@RequestMapping(path = "/client/order/check", method = RequestMethod.GET)
 	public String orderCheck(Model model) {
 		if (session.getAttribute("user") == null) {
@@ -223,6 +248,9 @@ public class ClientOrderRegistController {
 	}
 
 	//	戻るボタンでアドレス届け先入力画面に戻るためのメソッド
+	/**
+	 * @return redirect:/client/order/address/input
+	 */
 	@RequestMapping(path = "/client/order/payment/back", method = RequestMethod.POST)
 	public String orderBack() {
 		if (session.getAttribute("user") == null) {
@@ -233,6 +261,10 @@ public class ClientOrderRegistController {
 	}
 
 	//	注文内容の最終確認とtableへの登録更新と完了画面へのGet通信
+	/**
+	 * @param form
+	 * @return redirect:/client/order/complete
+	 */
 	@RequestMapping(path = "/client/order/complete", method = RequestMethod.POST)
 	public String orderComplete(OrderForm form) {
 
@@ -284,6 +316,9 @@ public class ClientOrderRegistController {
 	}
 
 	//	注文完了画面の表示
+	/**
+	 * @return client/order/complete
+	 */
 	@RequestMapping(path = "/client/order/complete", method = RequestMethod.GET)
 	public String orderComplete() {
 		if (session.getAttribute("user") == null) {

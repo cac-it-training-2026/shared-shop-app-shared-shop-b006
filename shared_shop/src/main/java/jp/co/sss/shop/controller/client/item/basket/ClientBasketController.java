@@ -22,8 +22,8 @@ import jp.co.sss.shop.repository.ItemRepository;
 
 /**
  * 買い物かごの処理のうち削除以外の処理を記述するコントローラー
+ * @author 高戸
  */
-
 @Controller
 public class ClientBasketController {
 
@@ -34,6 +34,11 @@ public class ClientBasketController {
 	ItemRepository itemRepository;
 
 	//	買い物かごの中身の表示メソッド
+	/**
+	 * @param form
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(path = "/client/basket/list")
 	String showBasket(@ModelAttribute LoginForm form, Model model) {
 
@@ -68,6 +73,11 @@ public class ClientBasketController {
 	}
 	//	買い物かごへの追加と在庫数の確認を行うメソッド
 
+	/**
+	 * @param id
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(path = "/client/basket/add", method = RequestMethod.POST)
 	public String addBasket(Integer id, Model model) {
 
@@ -155,6 +165,10 @@ public class ClientBasketController {
 	}
 
 	//	sessionに登録されているリストの中からIDを使用し該当商品の要素を削除する
+	/**
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(path = "/client/basket/delete", method = RequestMethod.POST)
 	String deleteBasket(Integer id) {
 		@SuppressWarnings("unchecked")
@@ -183,6 +197,9 @@ public class ClientBasketController {
 	}
 
 	//	sessionの削除を行い買い物かごを空にする
+	/**
+	 * @return redirect:/client/basket/list
+	 */
 	@RequestMapping(path = "/client/basket/allDelete", method = RequestMethod.POST)
 	String alldeleteBasket() {
 		session.removeAttribute("basketBeans");
