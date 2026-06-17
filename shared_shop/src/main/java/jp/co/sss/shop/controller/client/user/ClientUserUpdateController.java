@@ -22,7 +22,10 @@ import jp.co.sss.shop.util.Constant;
 /**
  * 会員管理 変更機能(一般会員用)のコントローラクラス
  * * 
+ * @author:日野遥矢
+ * 
  */
+
 @Controller
 public class ClientUserUpdateController {
 
@@ -104,6 +107,9 @@ public class ClientUserUpdateController {
 
 	/**
 	 * 変更確認処理
+	 * @param form   入力された会員情報のフォームオブジェクト
+	 * @param result 入力チェックの検証結果
+	 * 
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.POST)
 	public String updateCheck(@Valid @ModelAttribute UserForm form, BindingResult result) {
@@ -137,6 +143,8 @@ public class ClientUserUpdateController {
 
 	/**
 	 * 確認画面 表示処理
+	 * @param model Viewとの値受渡し用のModelオブジェクト
+	 * @return "client/user/update_check" 変更確認画面
 	 */
 	@RequestMapping(path = "/client/user/update/check", method = RequestMethod.GET)
 	public String updateCheckView(Model model) {
@@ -155,6 +163,7 @@ public class ClientUserUpdateController {
 
 	/**
 	 * 変更登録、完了画面表示処理
+	 * @return "redirect:/client/user/update/complete" 変更完了画面
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.POST)
 	public String updateComplete() {
@@ -198,6 +207,7 @@ public class ClientUserUpdateController {
 
 	/**
 	 * 変更完了画面 表示
+	 * @return "client/user/update_complete" 変更完了画面
 	 */
 	@RequestMapping(path = "/client/user/update/complete", method = RequestMethod.GET)
 	public String updateCompleteView() {
