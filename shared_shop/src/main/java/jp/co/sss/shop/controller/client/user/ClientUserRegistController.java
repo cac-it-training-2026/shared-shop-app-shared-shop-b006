@@ -81,9 +81,7 @@ public class ClientUserRegistController {
 		BindingResult result = (BindingResult) session.getAttribute("result");
 		//もしエラー情報が存在しているならばエラーの情報をThymeleafへ示す。
 		if (result != null) {
-			model.addAttribute(
-					"org.springframework.validation.BindingResult.userForm",
-					result);
+			model.addAttribute("org.springframework.validation.BindingResult.userForm", result);
 			//エラー情報を削除する
 			session.removeAttribute("result");
 		}
@@ -104,14 +102,12 @@ public class ClientUserRegistController {
 	public String registCheck(HttpSession session, @Valid @ModelAttribute UserForm userForm,
 			BindingResult result) {
 		UserForm lastUserForm = (UserForm) session.getAttribute("userForm");
-		if (lastUserForm == null) {
-			return "redirect:/login";
-		}
 		if (userForm.getAuthority() == null) {
 			userForm.setAuthority(lastUserForm.getAuthority());
 		}
 		session.setAttribute("userForm", userForm);
 		if (result.hasErrors()) {
+			session.setAttribute("result", result);
 			return "redirect:/client/user/regist/input";
 		} else {
 			return "redirect:/client/user/regist/check";
