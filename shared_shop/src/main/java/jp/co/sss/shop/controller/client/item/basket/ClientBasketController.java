@@ -21,7 +21,7 @@ import jp.co.sss.shop.form.LoginForm;
 import jp.co.sss.shop.repository.ItemRepository;
 
 /**
- * 買い物かごの処理のうち削除以外の処理を記述するコントローラー
+ * 買い物かごの処理を記述するコントローラー
  * @author 高戸
  */
 @Controller
@@ -49,17 +49,6 @@ public class ClientBasketController {
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
 
-		// 買い物かごが空なら、在庫不足系のメッセージを出さない
-		if (basketList == null || basketList.size() == 0) {
-			session.removeAttribute("itemNameListZero");
-			session.removeAttribute("itemNameListLessThan");
-
-			model.addAttribute("itemNameListZero", null);
-			model.addAttribute("itemNameListLessThan", null);
-
-			return "client/basket/list";
-		}
-
 		model.addAttribute(
 				"itemNameListLessThan",
 				session.getAttribute("itemNameListLessThan"));
@@ -69,6 +58,7 @@ public class ClientBasketController {
 				session.getAttribute("itemNameListZero"));
 
 		session.removeAttribute("itemNameListLessThan");
+		session.removeAttribute("itemNameListZero");
 		return "client/basket/list";
 	}
 	//	買い物かごへの追加と在庫数の確認を行うメソッド
@@ -89,16 +79,6 @@ public class ClientBasketController {
 		if (itemNameListZero == null) {
 			itemNameListZero = new ArrayList<>();
 		}
-		//		在庫数が0の場合にメーっセージを出力するため在庫数0の商品名をスコープに登録する処理
-		for (Item item : itemRepository.findAll()) {
-			if (item.getStock() == 0) {
-				if (!itemNameListZero.contains(item.getName())) {
-					itemNameListZero.add(item.getName());
-				}
-			}
-		}
-
-		session.setAttribute("itemNameListZero", itemNameListZero);
 
 		// セッションになければ生成
 		if (basketList == null) {
@@ -116,28 +96,51 @@ public class ClientBasketController {
 				isExist = true;
 				basketBean = itemInBasket;
 
-				//	注文に対してstockが足りない場合に在庫がないという表示をフロントで行うためのスコープへの登録
+				// DBから最新在庫を取得
+				Item item = itemRepository.getReferenceById(id);
 
-				if (basketBean.getStock() < basketBean.getOrderNum() + 1) {
+				// 在庫切れ
+				if (item.getStock() == 0) {
+
+					if (!itemNameListZero.contains(item.getName())) {
+						itemNameListZero.add(item.getName());
+					}
+
+					session.setAttribute(
+							"itemNameListZero",
+							itemNameListZero);
+
+				}
+				// 在庫不足
+				else if (item.getStock() < basketBean.getOrderNum() + 1) {
 
 					@SuppressWarnings("unchecked")
-					List<String> itemNameListLessThan = (List<String>) session.getAttribute("itemNameListLessThan");
+					List<String> itemNameListLessThan = (List<String>) session.getAttribute(
+							"itemNameListLessThan");
 
 					if (itemNameListLessThan == null) {
 						itemNameListLessThan = new ArrayList<>();
 					}
 
-					if (!itemNameListLessThan.contains(basketBean.getName())) {
-						itemNameListLessThan.add(basketBean.getName());
+					if (!itemNameListLessThan.contains(
+							basketBean.getName())) {
+						itemNameListLessThan.add(
+								basketBean.getName());
 					}
 
-					session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+					session.setAttribute(
+							"itemNameListLessThan",
+							itemNameListLessThan);
 
-				} else {
-					// 注文数を1増やす
+				}
+				// 在庫に余裕あり
+				else {
+
 					basketBean.setOrderNum(
 							basketBean.getOrderNum() + 1);
+
 				}
+
 				break;
 			}
 		}
@@ -145,7 +148,25 @@ public class ClientBasketController {
 		// なければ新規追加
 		if (!isExist) {
 
-			Item item = itemRepository.getReferenceById(id);
+			Item item = itemRepository.findById(id).orElse(null);
+
+			if (item == null) {
+				return "redirect:/client/basket/list";
+			}
+
+			// 在庫切れ
+			if (item.getStock() == 0) {
+
+				if (!itemNameListZero.contains(item.getName())) {
+					itemNameListZero.add(item.getName());
+				}
+
+				session.setAttribute(
+						"itemNameListZero",
+						itemNameListZero);
+
+				return "redirect:/client/basket/list";
+			}
 
 			basketBean = new BasketBean();
 
