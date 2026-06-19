@@ -34,6 +34,11 @@
 		</div>
 		<div class="detail_button_area">
 			<form th:action="@{/client/basket/add}" method="post" class="user_info_form" th:if="*{stock > 0}">
+				<span class="item_count">数量：
+					<select name="orderNum">
+						<option th:each="i : ${#numbers.sequence(1, item.stock > 10 ? 10 : item.stock)}" th:value="${i}" th:text="${i}"></option>
+					</select>
+				</span>
 				<input type="hidden" th:field="*{id}" />
 				<input type="submit" value="買い物かごに入れる" class="send_button" />
 			</form>
