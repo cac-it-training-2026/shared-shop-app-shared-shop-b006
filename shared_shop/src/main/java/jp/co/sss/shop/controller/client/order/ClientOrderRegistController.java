@@ -31,6 +31,7 @@ import jp.co.sss.shop.repository.OrderItemRepository;
 import jp.co.sss.shop.repository.OrderRepository;
 import jp.co.sss.shop.repository.UserCouponRepository;
 import jp.co.sss.shop.repository.UserRepository;
+import jp.co.sss.shop.service.PriceCalc;
 
 /**
 * 注文機能を実装するコントローラー
@@ -57,6 +58,12 @@ public class ClientOrderRegistController {
 
 	@Autowired
 	UserCouponRepository userCouponRepository;
+
+	/**
+	 * 料金計算サービス
+	 */
+	@Autowired
+	PriceCalc priceCalc;
 
 	//	届け先住所の登録と入力フォームに表示する初期値の設定を行う
 	/**
@@ -272,10 +279,7 @@ public class ClientOrderRegistController {
 				}
 			}
 
-			int total = sum;
-			if (discountRate > 0) {
-				total = (int) (sum * (1.0 - (discountRate / 100.0)));
-			}
+			int total = priceCalc.calculateDiscountedPrice(sum, discountRate);
 
 			model.addAttribute("subtotalSum", sum);
 			model.addAttribute("discountRate", discountRate);
