@@ -5,6 +5,8 @@
 <head>
 	<title th:text="#{item}+#{title.detail}+' | '+ #{shop.title}"> </title>
 	<meta charset="UTF-8" />
+	<script type="text/javascript" th:src="@{/js/jquery-1.10.2.min.js}"></script>
+	<script type="text/javascript" th:src="@{/js/quantity.js}"></script>
 </head>
 
 <body class="user">
@@ -35,6 +37,11 @@
 		<div class="detail_button_area">
 			<form th:action="@{/client/basket/add}" method="post" class="user_info_form" th:if="*{stock > 0}">
 				<input type="hidden" th:field="*{id}" />
+				<div class="quantity_area">
+					<input type="button" value="-" class="minus_button" />
+					<input type="number" name="quantity" value="1" min="1" th:max="*{stock}" class="quantity_input" />
+					<input type="button" value="+" class="plus_button" />
+				</div>
 				<input type="submit" value="買い物かごに入れる" class="send_button" />
 			</form>
 			<form th:action="@{/client/item/list/1}" method="post">
