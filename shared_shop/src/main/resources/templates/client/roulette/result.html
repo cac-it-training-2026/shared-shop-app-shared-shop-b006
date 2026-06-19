@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
+<head>
+<title>ルーレット結果 | シェアードショップ</title>
+<meta charset="UTF-8" />
+<style>
+.result-container {
+	text-align: center;
+	padding: 50px;
+}
+.discount-badge {
+	font-size: 3rem;
+	color: #ff6b6b;
+	font-weight: bold;
+	margin: 20px;
+}
+</style>
+</head>
+<body class="user">
+	<div class="result-container">
+		<h2 class="title">ルーレット結果</h2>
+		<p>おめでとうございます！以下のクーポンを獲得しました！</p>
+
+		<div class="discount-badge">
+			<span th:text="${discountRate}"></span>% OFF
+		</div>
+
+		<p>獲得したクーポンは注文時にご利用いただけます。（有効期限：1週間）</p>
+
+		<div class="link">
+			<a th:href="@{/}" class="button">トップへ戻る</a>
+		</div>
+	</div>
+</body>
+</html>

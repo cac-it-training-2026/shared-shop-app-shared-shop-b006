@@ -20,6 +20,7 @@ import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.repository.OrderRepository;
+import jp.co.sss.shop.repository.ReviewRepository;
 import jp.co.sss.shop.service.BeanTools;
 import jp.co.sss.shop.service.PriceCalc;
 
@@ -55,6 +56,12 @@ public class ClientOrderShowController {
 	private BeanTools beanTools;
 
 	/**
+	 * レビュー情報 リポジトリ
+	 */
+	@Autowired
+	private ReviewRepository reviewRepository;
+
+	/**
 	 * 一覧取得、一覧画面表示 処理
 	 *
 	 * @param model Viewとの値受渡し
@@ -63,6 +70,10 @@ public class ClientOrderShowController {
 	 */
 	@RequestMapping(path = "/client/order/list", method = { RequestMethod.GET, RequestMethod.POST })
 	public String showOrderList(Model model, Pageable pageable) {
+
+		// セッションスコープのレビュー投稿用フォーム関連属性を削除
+		session.removeAttribute("reviewForm");
+		session.removeAttribute("result");
 
 		// セッションからログイン会員情報を取得
 		final UserBean loginUser = (UserBean) session.getAttribute("user");
@@ -108,6 +119,10 @@ public class ClientOrderShowController {
 	@RequestMapping(path = "/client/order/detail/{id}", method = RequestMethod.GET)
 	public String showOrder(@PathVariable int id, Model model) {
 
+		// セッションスコープのレビュー投稿用フォーム関連属性を削除
+		session.removeAttribute("reviewForm");
+		session.removeAttribute("result");
+
 		// セッションからログイン会員情報を取得
 		final UserBean loginUser = (UserBean) session.getAttribute("user");
 		if (loginUser == null) {
@@ -131,12 +146,18 @@ public class ClientOrderShowController {
 		// 注文商品情報を取得
 		List<OrderItemBean> orderItemBeanList = beanTools.generateOrderItemBeanList(order.getOrderItemsList());
 
+		// レビュー投稿済みフラグを判定
+		List<Boolean> reviewedList = order.getOrderItemsList().stream()
+				.map(oi -> (Boolean) reviewRepository.existsByOrderIdAndItemId(order.getId(), oi.getItem().getId()))
+				.toList();
+
 		// 合計金額を算出
 		int total = priceCalc.orderItemBeanPriceTotalUseSubtotal(orderItemBeanList);
 
 		// 注文情報をViewへ渡す
 		model.addAttribute("order", orderBean);
 		model.addAttribute("orderItemBeans", orderItemBeanList);
+		model.addAttribute("reviewedList", reviewedList);
 		model.addAttribute("total", total);
 
 		return "client/order/detail";

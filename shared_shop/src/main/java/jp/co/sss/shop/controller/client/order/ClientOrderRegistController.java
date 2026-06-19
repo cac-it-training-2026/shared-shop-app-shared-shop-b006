@@ -24,10 +24,12 @@ import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.entity.User;
+import jp.co.sss.shop.entity.UserCoupon;
 import jp.co.sss.shop.form.OrderForm;
 import jp.co.sss.shop.repository.ItemRepository;
 import jp.co.sss.shop.repository.OrderItemRepository;
 import jp.co.sss.shop.repository.OrderRepository;
+import jp.co.sss.shop.repository.UserCouponRepository;
 import jp.co.sss.shop.repository.UserRepository;
 
 /**
@@ -52,6 +54,9 @@ public class ClientOrderRegistController {
 
 	@Autowired
 	OrderItemRepository orderItemRepository;
+
+	@Autowired
+	UserCouponRepository userCouponRepository;
 
 	//	届け先住所の登録と入力フォームに表示する初期値の設定を行う
 	/**
@@ -140,6 +145,13 @@ public class ClientOrderRegistController {
 
 		model.addAttribute("orderForm", orderForm);
 		model.addAttribute("payMethod", orderForm.getPayMethod());
+
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		User user = userRepository.getReferenceById(loginUser.getId());
+		List<UserCoupon> coupons = userCouponRepository.findByUserAndIsUsedAndExpiryDateGreaterThanEqual(
+				user, 0, Date.valueOf(LocalDate.now()));
+		model.addAttribute("coupons", coupons);
+
 		return "client/order/payment_input";
 	}
 
@@ -156,6 +168,7 @@ public class ClientOrderRegistController {
 		}
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
 		orderForm.setPayMethod(form.getPayMethod());
+		orderForm.setCouponId(form.getCouponId()); // 選択されたクーポンIDを保存
 		session.setAttribute("orderForm", orderForm);
 		return "redirect:/client/order/check";
 	}
@@ -171,6 +184,14 @@ public class ClientOrderRegistController {
 
 			return "redirect:/login";
 		}
+
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		User user = userRepository.getReferenceById(loginUser.getId());
+
+		// 利用可能なクーポンリストを取得
+		List<UserCoupon> coupons = userCouponRepository.findByUserAndIsUsedAndExpiryDateGreaterThanEqual(
+				user, 0, Date.valueOf(LocalDate.now()));
+		model.addAttribute("coupons", coupons);
 
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
 		model.addAttribute("orderForm", orderForm);
@@ -241,7 +262,24 @@ public class ClientOrderRegistController {
 
 		if (basketList.size() != 0) {
 			model.addAttribute("orderItemBeans", orderItemBeans);
-			model.addAttribute("total", sum);
+
+			// 割引計算
+			int discountRate = 0;
+			if (orderForm.getCouponId() != null && orderForm.getCouponId() != 0) {
+				UserCoupon coupon = userCouponRepository.findById(orderForm.getCouponId()).orElse(null);
+				if (coupon != null && coupon.getIsUsed() == 0) {
+					discountRate = coupon.getDiscountRate();
+				}
+			}
+
+			int total = sum;
+			if (discountRate > 0) {
+				total = (int) (sum * (1.0 - (discountRate / 100.0)));
+			}
+
+			model.addAttribute("subtotalSum", sum);
+			model.addAttribute("discountRate", discountRate);
+			model.addAttribute("total", total);
 		}
 
 		return "client/order/check";
@@ -293,6 +331,15 @@ public class ClientOrderRegistController {
 		order.setInsertDate(Date.valueOf(LocalDate.now()));
 		order.setUser(user);
 		order = orderRepository.save(order);
+
+		// クーポンを使用済みに更新
+		if (orderForm.getCouponId() != null && orderForm.getCouponId() != 0) {
+			UserCoupon coupon = userCouponRepository.findById(orderForm.getCouponId()).orElse(null);
+			if (coupon != null && coupon.getIsUsed() == 0) {
+				coupon.setIsUsed(1); // 使用済み
+				userCouponRepository.save(coupon);
+			}
+		}
 
 		//		注文詳細tableへの登録と商品の在庫の更新
 		for (BasketBean basketBean : basketList) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jp.co.sss.shop.bean.BasketBean;
@@ -16,6 +17,8 @@ import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.form.ItemForm;
+import jp.co.sss.shop.repository.ReviewRepository;
+import jp.co.sss.shop.util.Constant;
 
 /**
  * オブジェクト間でのフィールドコピー処理を行うクラス
@@ -24,6 +27,12 @@ import jp.co.sss.shop.form.ItemForm;
  */
 @Service
 public class BeanTools {
+	/**
+	 * レビュー情報 リポジトリ
+	 */
+	@Autowired
+	private ReviewRepository reviewRepository;
+
 	/**
 	 * ItemFormクラスの各フィールドの値をItemBeanクラスにコピー
 	 *
@@ -92,6 +101,12 @@ public class BeanTools {
 		bean.setCategoryId(entity.getCategory().getId());
 		bean.setCategoryName(entity.getCategory().getName());
 
+		// 平均評価とレビュー数を設定
+		Double avgRating = reviewRepository.getAverageRating(entity.getId(), Constant.NOT_DELETED);
+		Long reviewCount = reviewRepository.getReviewCount(entity.getId(), Constant.NOT_DELETED);
+		bean.setAverageRating(avgRating != null ? avgRating : 0.0);
+		bean.setReviewCount(reviewCount != null ? reviewCount.intValue() : 0);
+
 		return bean;
 	}
 
@@ -149,6 +164,12 @@ public class BeanTools {
 			if (entity.getCategory() != null) {
 				bean.setCategoryName(entity.getCategory().getName());
 			}
+
+			// 平均評価とレビュー数を設定
+			Double avgRating = reviewRepository.getAverageRating(entity.getId(), Constant.NOT_DELETED);
+			Long reviewCount = reviewRepository.getReviewCount(entity.getId(), Constant.NOT_DELETED);
+			bean.setAverageRating(avgRating != null ? avgRating : 0.0);
+			bean.setReviewCount(reviewCount != null ? reviewCount.intValue() : 0);
 
 			beanList.add(bean);
 		}

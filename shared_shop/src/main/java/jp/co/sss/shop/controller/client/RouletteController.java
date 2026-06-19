@@ -1,0 +1,93 @@
+package jp.co.sss.shop.controller.client;
+
+import java.sql.Date;
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import jakarta.servlet.http.HttpSession;
+import jp.co.sss.shop.bean.UserBean;
+import jp.co.sss.shop.entity.User;
+import jp.co.sss.shop.entity.UserCoupon;
+import jp.co.sss.shop.repository.UserCouponRepository;
+import jp.co.sss.shop.repository.UserRepository;
+import jp.co.sss.shop.service.RouletteService;
+
+/**
+ * ルーレット機能用コントローラクラス
+ *
+ * @author Jules
+ */
+@Controller
+public class RouletteController {
+
+	@Autowired
+	UserRepository userRepository;
+
+	@Autowired
+	UserCouponRepository userCouponRepository;
+
+	@Autowired
+	RouletteService rouletteService;
+
+	@Autowired
+	HttpSession session;
+
+	/**
+	 * ルーレット画面表示
+	 * @return "client/roulette/roulette"
+	 */
+	@RequestMapping(path = "/client/roulette", method = RequestMethod.GET)
+	public String showRoulette() {
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser == null) {
+			return "redirect:/login";
+		}
+		return "client/roulette/roulette";
+	}
+
+	/**
+	 * ルーレット実行と結果登録
+	 * @param model
+	 * @return "client/roulette/result"
+	 */
+	@RequestMapping(path = "/client/roulette/run", method = RequestMethod.POST)
+	public String runRoulette(Model model) {
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser == null) {
+			return "redirect:/login";
+		}
+
+		User user = userRepository.getReferenceById(loginUser.getId());
+		Date today = Date.valueOf(LocalDate.now());
+
+		// 二重実行防止
+		if (user.getLastRouletteDate() != null && user.getLastRouletteDate().equals(today)) {
+			return "redirect:/";
+		}
+
+		// ルーレット実行
+		int discountRate = rouletteService.determineDiscountRate();
+
+		// ユーザーの最終実行日を更新
+		user.setLastRouletteDate(today);
+		userRepository.save(user);
+
+		// クーポンを保存
+		UserCoupon coupon = new UserCoupon();
+		coupon.setUser(user);
+		coupon.setDiscountRate(discountRate);
+		coupon.setIsUsed(0); // 未使用
+		// 有効期限は1週間後とする
+		coupon.setExpiryDate(Date.valueOf(LocalDate.now().plusWeeks(1)));
+		userCouponRepository.save(coupon);
+
+		model.addAttribute("discountRate", discountRate);
+
+		return "client/roulette/result";
+	}
+}

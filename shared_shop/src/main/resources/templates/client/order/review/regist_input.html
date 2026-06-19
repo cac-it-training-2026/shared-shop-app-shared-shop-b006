@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
+<head>
+<title th:text="#{review.regist.title}">レビュー投稿入力</title>
+</head>
+<body>
+    <h2 th:text="#{review.regist.title}">レビュー投稿入力</h2>
+    <form th:action="@{/client/order/review/regist/check}" th:object="${reviewForm}" method="post">
+        <ul th:if="${#fields.hasErrors('*')}" class="error_list">
+            <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+        </ul>
+        <table class="input_table">
+            <tr>
+                <th th:text="#{review.rating}">評価</th>
+                <td>
+                    <select name="rating" th:field="*{rating}">
+                        <option value="5">★★★★★ (5)</option>
+                        <option value="4">★★★★☆ (4)</option>
+                        <option value="3">★★★☆☆ (3)</option>
+                        <option value="2">★★☆☆☆ (2)</option>
+                        <option value="1">★☆☆☆☆ (1)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th th:text="#{review.displayName}">表示名</th>
+                <td><input type="text" th:field="*{displayName}" /></td>
+            </tr>
+            <tr>
+                <th th:text="#{review.title}">タイトル</th>
+                <td><input type="text" th:field="*{title}" /></td>
+            </tr>
+            <tr>
+                <th th:text="#{review.body}">本文</th>
+                <td><textarea th:field="*{body}" rows="5" cols="40"></textarea></td>
+            </tr>
+        </table>
+        <input type="submit" th:value="#{review.regist.check}" class="send_button" />
+    </form>
+    <div class="back_link">
+        <a th:href="@{/client/order/detail/{id}(id=*{orderId})}" th:text="#{back.to.orderDetail}">注文詳細へ戻る</a>
+    </div>
+</body>
+</html>
