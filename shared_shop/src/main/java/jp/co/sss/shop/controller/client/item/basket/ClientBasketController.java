@@ -1,11 +1,8 @@
 package jp.co.sss.shop.controller.client.item.basket;
 
-/**
- * 
- */
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -65,16 +62,14 @@ public class ClientBasketController {
 
 	/**
 	 * @param id
-	 * @param orderNum
+	 * @param quantity
 	 * @param model
 	 * @return
 	 */
 	@RequestMapping(path = "/client/basket/add", method = RequestMethod.POST)
-	public String addBasket(Integer id, Integer orderNum, Model model) {
+	public String addBasket(final Integer id, final Integer quantity, final Model model) {
 
-		if (orderNum == null) {
-			orderNum = 1;
-		}
+		final Integer orderNum = (quantity == null) ? 1 : quantity;
 
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
@@ -90,95 +85,62 @@ public class ClientBasketController {
 			basketList = new ArrayList<>();
 		}
 
-		boolean isExist = false;
-		BasketBean basketBean = null;
+		final Optional<BasketBean> existingBean = basketList.stream()
+				.filter(b -> b.getId().equals(id))
+				.findFirst();
 
 		// 同じ商品があるか確認
-		for (BasketBean itemInBasket : basketList) {
+		if (existingBean.isPresent()) {
+			final BasketBean basketBean = existingBean.get();
 
-			if (itemInBasket.getId().equals(id)) {
+			// 在庫不足 (追加時点のスナップショットと比較)
+			if (basketBean.getStock() < basketBean.getOrderNum() + orderNum) {
 
-				isExist = true;
-				basketBean = itemInBasket;
+				@SuppressWarnings("unchecked")
+				List<String> itemNameListLessThan = (List<String>) session.getAttribute(
+						"itemNameListLessThan");
 
-				// DBから最新在庫を取得
-				Item item = itemRepository.getReferenceById(id);
-
-				// 在庫切れ
-				if (item.getStock() == 0) {
-
-					if (!itemNameListZero.contains(item.getName())) {
-						itemNameListZero.add(item.getName());
-					}
-
-					session.setAttribute(
-							"itemNameListZero",
-							itemNameListZero);
-
-				}
-				// 在庫不足
-				else if (item.getStock() < basketBean.getOrderNum() + orderNum) {
-
-					@SuppressWarnings("unchecked")
-					List<String> itemNameListLessThan = (List<String>) session.getAttribute(
-							"itemNameListLessThan");
-
-					if (itemNameListLessThan == null) {
-						itemNameListLessThan = new ArrayList<>();
-					}
-
-					if (!itemNameListLessThan.contains(
-							basketBean.getName())) {
-						itemNameListLessThan.add(
-								basketBean.getName());
-					}
-
-					session.setAttribute(
-							"itemNameListLessThan",
-							itemNameListLessThan);
-
-				}
-				// 在庫に余裕あり
-				else {
-
-					basketBean.setOrderNum(
-							basketBean.getOrderNum() + orderNum);
-
+				if (itemNameListLessThan == null) {
+					itemNameListLessThan = new ArrayList<>();
 				}
 
-				break;
+				if (!itemNameListLessThan.contains(basketBean.getName())) {
+					itemNameListLessThan.add(basketBean.getName());
+				}
+
+				session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+
 			}
-		}
+			// 在庫に余裕あり
+			else {
+				basketBean.setOrderNum(basketBean.getOrderNum() + orderNum);
+			}
+		} else {
+			// なければ新規追加
+			final Optional<Item> itemOpt = itemRepository.findById(id);
 
-		// なければ新規追加
-		if (!isExist) {
-
-			Item item = itemRepository.findById(id).orElse(null);
-
-			if (item == null) {
+			if (itemOpt.isEmpty()) {
 				return "redirect:/client/basket/list";
 			}
 
+			final Item item = itemOpt.get();
+
 			// 在庫切れ
-			if (item.getStock() == 0) {
+			if (item.getStock() == 0 || item.getStock() < orderNum) {
 
 				if (!itemNameListZero.contains(item.getName())) {
 					itemNameListZero.add(item.getName());
 				}
 
-				session.setAttribute(
-						"itemNameListZero",
-						itemNameListZero);
+				session.setAttribute("itemNameListZero", itemNameListZero);
 
 				return "redirect:/client/basket/list";
 			}
 
-			basketBean = new BasketBean();
-
+			final BasketBean basketBean = new BasketBean();
 			basketBean.setId(item.getId());
 			basketBean.setName(item.getName());
 			basketBean.setStock(item.getStock());
-
 			basketBean.setOrderNum(orderNum);
 
 			basketList.add(basketBean);
@@ -190,55 +152,43 @@ public class ClientBasketController {
 
 	}
 
-	//	買い物かご内の商品の数量を変更するメソッド
 	/**
+	 * 買い物かご内の商品の数量を直接更新するメソッド
 	 * @param id
-	 * @param orderNum
+	 * @param quantity
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(path = "/client/basket/update", method = RequestMethod.POST)
-	public String updateBasket(Integer id, Integer orderNum, Model model) {
+	@RequestMapping(path = "/client/basket/updateQuantity", method = RequestMethod.POST)
+	public String updateQuantity(final Integer id, final Integer quantity, final Model model) {
+
+		if (quantity == null || quantity <= 0) {
+			return deleteBasket(id);
+		}
 
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
 
 		if (basketList != null) {
-			for (BasketBean basketBean : basketList) {
-				if (basketBean.getId().equals(id)) {
-
-					// DBから最新在庫を取得
-					Item item = itemRepository.getReferenceById(id);
-
-					// 在庫不足
-					if (item.getStock() < orderNum) {
-
-						@SuppressWarnings("unchecked")
-						List<String> itemNameListLessThan = (List<String>) session.getAttribute(
-								"itemNameListLessThan");
-
-						if (itemNameListLessThan == null) {
-							itemNameListLessThan = new ArrayList<>();
+			basketList.stream()
+					.filter(b -> b.getId().equals(id))
+					.findFirst()
+					.ifPresent(basketBean -> {
+						// 在庫不足 (追加時点のスナップショットと比較)
+						if (basketBean.getStock() < quantity) {
+							@SuppressWarnings("unchecked")
+							List<String> itemNameListLessThan = (List<String>) session.getAttribute("itemNameListLessThan");
+							if (itemNameListLessThan == null) {
+								itemNameListLessThan = new ArrayList<>();
+							}
+							if (!itemNameListLessThan.contains(basketBean.getName())) {
+								itemNameListLessThan.add(basketBean.getName());
+							}
+							session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+						} else {
+							basketBean.setOrderNum(quantity);
 						}
-
-						if (!itemNameListLessThan.contains(
-								basketBean.getName())) {
-							itemNameListLessThan.add(
-									basketBean.getName());
-						}
-
-						session.setAttribute(
-								"itemNameListLessThan",
-								itemNameListLessThan);
-
-					}
-					// 在庫に余裕あり
-					else {
-						basketBean.setOrderNum(orderNum);
-					}
-					break;
-				}
-			}
+					});
 		}
 
 		return "redirect:/client/basket/list";
@@ -250,7 +200,7 @@ public class ClientBasketController {
 	 * @return
 	 */
 	@RequestMapping(path = "/client/basket/delete", method = RequestMethod.POST)
-	String deleteBasket(Integer id) {
+	public String deleteBasket(final Integer id) {
 		@SuppressWarnings("unchecked")
 		List<BasketBean> basketList = (List<BasketBean>) session.getAttribute("basketBeans");
 
@@ -259,13 +209,12 @@ public class ClientBasketController {
 		}
 
 		//		リストの中身が0の場合でもNullにはならないため買い物かごが空という表示を行うためsessionの削除を行う
-		if (basketList == null || basketList.size() == 0) {
+		if (basketList == null || basketList.isEmpty()) {
 			session.removeAttribute("basketBeans");
-			return "redirect:/client/basket/list";
 		} else {
 			session.setAttribute("basketBeans", basketList);
-			return "redirect:/client/basket/list";
 		}
+		return "redirect:/client/basket/list";
 
 	}
 

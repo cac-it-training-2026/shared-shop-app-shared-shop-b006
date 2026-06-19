@@ -34,25 +34,17 @@
 			<tr>
 				<th>[[#{data.basket.item.name}]]</th>
 				<th>[[#{data.basket.count}]]</th>
-				<th>[[#{data.basket.operate}]]</th>
 				<th>[[#{data.basket.stock.status}]]</th>
 			</tr>
 			<tr th:each="item, status: ${session.basketBeans}">
 				<td><a th:href="@{/client/item/detail/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
 				<td>
-					<form th:action="@{/client/basket/update}" method="post">
-						<select name="orderNum">
-							<option th:each="i : ${#numbers.sequence(1, item.stock > 10 ? 10 : item.stock)}"
-								th:value="${i}" th:text="${i}" th:selected="${i == item.orderNum}"></option>
-						</select>
+					<form th:action="@{/client/basket/updateQuantity}" method="post">
+						<input type="button" value="-" class="minus-btn" />
+						<input type="number" name="quantity" th:value="${item.orderNum}" min="0" />
+						<input type="button" value="+" class="plus-btn" />
 						<input type="hidden" name="id" th:value="${item.id}" />
 						<input type="submit" value="変更" />
-					</form>
-				</td>
-				<td>
-					<form th:action="@{/client/basket/delete}" method="post">
-						<input type="hidden" name="id" th:value="${item.id}" /> <input type="submit" value="削除"
-							class="delete" />
 					</form>
 				</td>
 				<td th:if="${item.stock == 0}" th:text="#{data.out.of.stock}"></td>
