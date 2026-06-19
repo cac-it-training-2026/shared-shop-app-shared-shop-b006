@@ -215,26 +215,3 @@ public class ClientItemShowController {
 		return "client/item/detail";
 	}
 }
-
-/**
- * 全画面共通で使用するデータをModelへ設定するクラス。
- * サイドバーに表示するカテゴリ一覧を取得し、
- * 「categories」として全画面へ配信する。
- *
- * @author 近藤灯
- */
-
-@org.springframework.web.bind.annotation.ControllerAdvice
-class CommonControllerAdvice {
-
-	@Autowired
-	jp.co.sss.shop.repository.CategoryRepository categoryRepository;
-
-	/**
-	 * システム内のすべての画面にカテゴリリストを配信します
-	 */
-	@org.springframework.web.bind.annotation.ModelAttribute("categories")
-	public List<Category> getCategories() {
-		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(jp.co.sss.shop.util.Constant.NOT_DELETED);
-	}
-}

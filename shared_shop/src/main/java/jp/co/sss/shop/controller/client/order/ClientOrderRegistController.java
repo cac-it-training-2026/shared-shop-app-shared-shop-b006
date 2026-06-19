@@ -273,8 +273,9 @@ public class ClientOrderRegistController {
 			// 割引計算
 			int discountRate = 0;
 			if (orderForm.getCouponId() != null && orderForm.getCouponId() != 0) {
+				// クーポンIDからクーポン情報を取得し、所有者チェックを行う
 				UserCoupon coupon = userCouponRepository.findById(orderForm.getCouponId()).orElse(null);
-				if (coupon != null && coupon.getIsUsed() == 0) {
+				if (coupon != null && coupon.getIsUsed() == 0 && coupon.getUser().getId().equals(loginUser.getId())) {
 					discountRate = coupon.getDiscountRate();
 				}
 			}
