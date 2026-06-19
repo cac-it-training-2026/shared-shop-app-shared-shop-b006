@@ -1,5 +1,6 @@
 package jp.co.sss.shop.controller.client.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,6 +197,57 @@ public class ClientItemShowController {
 		model.addAttribute("items", itemBeanList);
 		model.addAttribute("sortType", sortType);
 		model.addAttribute("categoryId", categoryId);
+
+		return "client/item/list";
+	}
+
+	/**
+	 * 商品検索処理（あいまい検索）
+	 * @param itemName 検索キーワード
+	 * @param model Viewとの値受渡し
+	 * @param session 検索履歴保存用セッション
+	 * @return "client/item/list" 商品一覧画面
+	 */
+	@RequestMapping(path = "/client/item/search", method = { RequestMethod.GET, RequestMethod.POST })
+	public String searchItem(
+			@RequestParam(name = "itemName", required = false) String itemName,
+			Model model,
+			HttpSession session) {
+
+		// 検索履歴の取得と保存
+		@SuppressWarnings("unchecked")
+		List<String> searchHistory = (List<String>) session.getAttribute("searchHistory");
+		if (searchHistory == null) {
+			searchHistory = new ArrayList<>();
+		}
+
+		if (itemName != null && !itemName.isBlank()) {
+			// 重複を避けて先頭に追加（簡易的な履歴管理）
+			searchHistory.remove(itemName);
+			searchHistory.add(0, itemName);
+			// 履歴は最大5件まで保持
+			if (searchHistory.size() > 5) {
+				searchHistory.remove(5);
+			}
+			session.setAttribute("searchHistory", searchHistory);
+		}
+
+		List<Item> itemList;
+		if (itemName != null && !itemName.isBlank()) {
+			itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(itemName,
+					Constant.NOT_DELETED);
+		} else {
+			// キーワード空の場合は全件（新着順）
+			itemList = itemRepository.findByDeleteFlagOrderByInsertDateDesc(Constant.NOT_DELETED);
+		}
+
+		// 検索結果をBeanリストに変換
+		List<ItemBean> itemBeanList = beanTools.copyEntityListToItemBeanList(itemList);
+
+		// 画面に値を渡す
+		model.addAttribute("items", itemBeanList);
+		model.addAttribute("sortType", 1); // 検索時は新着順ベースとして扱う
+		model.addAttribute("itemName", itemName);
 
 		return "client/item/list";
 	}
