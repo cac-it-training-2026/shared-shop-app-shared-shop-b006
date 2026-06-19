@@ -76,8 +76,9 @@ public class ClientOrderReviewController {
 		}
 
 		// 購入済み・確定済みであることの検証
-		Optional<Order> orderOpt = orderRepository.findByIdAndUserIdAndPayMethodIsNotNull(orderId, loginUser.getId());
-		if (orderOpt.isEmpty()) {
+		// NOTE: Use standard findById and verify conditions to avoid JPA method parsing issues that trigger syserror.
+		Optional<Order> orderOpt = orderRepository.findById(orderId);
+		if (orderOpt.isEmpty() || !orderOpt.get().getUser().getId().equals(loginUser.getId()) || orderOpt.get().getPayMethod() == null) {
 			return "redirect:/syserror";
 		}
 

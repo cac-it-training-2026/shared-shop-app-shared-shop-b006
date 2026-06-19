@@ -116,6 +116,22 @@ public class ClientItemShowController {
 		// エンティティ内の検索結果をJavaBeansにコピー
 		List<ItemBean> itemBeanList = beanTools.copyEntityListToItemBeanList(itemList);
 
+		// N+1対策：ページ内に表示される商品のレビュー平均・件数を一括取得してBeanにセットする
+		List<Integer> itemIds = itemBeanList.stream().map(ItemBean::getId).toList();
+		if (!itemIds.isEmpty()) {
+			List<Object[]> aggregates = reviewRepository.getReviewAggregatesByItemIds(itemIds, Constant.NOT_DELETED);
+			for (ItemBean bean : itemBeanList) {
+				Object[] agg = aggregates.stream().filter(a -> ((Integer) a[0]).equals(bean.getId())).findFirst().orElse(null);
+				if (agg != null) {
+					bean.setAverageRating(agg[1] != null ? ((Number) agg[1]).doubleValue() : 0.0);
+					bean.setReviewCount(agg[2] != null ? ((Number) agg[2]).intValue() : 0);
+				} else {
+					bean.setAverageRating(0.0);
+					bean.setReviewCount(0);
+				}
+			}
+		}
+
 		// 商品情報と「現在のソート順」Viewへ渡す
 		model.addAttribute("items", itemBeanList);
 		model.addAttribute("sortType", sortType);
@@ -200,6 +216,22 @@ public class ClientItemShowController {
 		// 検索結果をBeanリストに変換
 		List<ItemBean> itemBeanList = beanTools.copyEntityListToItemBeanList(itemList);
 
+		// N+1対策：ページ内に表示される商品のレビュー平均・件数を一括取得してBeanにセットする
+		List<Integer> itemIds2 = itemBeanList.stream().map(ItemBean::getId).toList();
+		if (!itemIds2.isEmpty()) {
+			List<Object[]> aggregates = reviewRepository.getReviewAggregatesByItemIds(itemIds2, Constant.NOT_DELETED);
+			for (ItemBean bean : itemBeanList) {
+				Object[] agg = aggregates.stream().filter(a -> ((Integer) a[0]).equals(bean.getId())).findFirst().orElse(null);
+				if (agg != null) {
+					bean.setAverageRating(agg[1] != null ? ((Number) agg[1]).doubleValue() : 0.0);
+					bean.setReviewCount(agg[2] != null ? ((Number) agg[2]).intValue() : 0);
+				} else {
+					bean.setAverageRating(0.0);
+					bean.setReviewCount(0);
+				}
+			}
+		}
+
 		// 画面に値を渡す
 		model.addAttribute("items", itemBeanList);
 		model.addAttribute("sortType", sortType);
@@ -220,9 +252,12 @@ public class ClientItemShowController {
 		}
 		ItemBean itemBean = beanTools.copyEntityToItemBean(item);
 
-		// レビュー一覧を取得
-		List<Review> reviewList = reviewRepository.findByItemIdAndDeleteFlagOrderByInsertDateDesc(id,
-				Constant.NOT_DELETED);
+		// レビュー一覧と集計情報を取得
+		List<Review> reviewList = reviewRepository.findByItemIdAndDeleteFlagOrderByInsertDateDesc(id, Constant.NOT_DELETED);
+		Double avgRating = reviewRepository.getAverageRating(id, Constant.NOT_DELETED);
+		Long reviewCount = reviewRepository.getReviewCount(id, Constant.NOT_DELETED);
+		itemBean.setAverageRating(avgRating != null ? avgRating : 0.0);
+		itemBean.setReviewCount(reviewCount != null ? reviewCount.intValue() : 0);
 
 		model.addAttribute("item", itemBean);
 		model.addAttribute("reviews", reviewList);

@@ -130,10 +130,10 @@ public class ClientOrderShowController {
 		}
 
 		// 変更点：リポジトリのメソッドを使い、「注文ID」「ユーザーID」「支払方法が存在する（確定済）」の3条件で取得
-		Optional<Order> orderOpt = orderRepository.findByIdAndUserIdAndPayMethodIsNotNull(id, loginUser.getId());
+		Optional<Order> orderOpt = orderRepository.findById(id);
 
 		// 変更点：データが存在しない（他人のデータ、カート状態、または存在しないID）場合は安全にシステムエラーへ飛ばす
-		if (orderOpt.isEmpty()) {
+		if (orderOpt.isEmpty() || !orderOpt.get().getUser().getId().equals(loginUser.getId()) || orderOpt.get().getPayMethod() == null) {
 			return "redirect:/syserror";
 		}
 
