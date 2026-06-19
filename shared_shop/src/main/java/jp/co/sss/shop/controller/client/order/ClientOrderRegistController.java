@@ -334,16 +334,20 @@ public class ClientOrderRegistController {
 		BeanUtils.copyProperties(orderForm, order, "id", "insertDate", "orderItemsList", "user");
 		order.setInsertDate(Date.valueOf(LocalDate.now()));
 		order.setUser(user);
-		order = orderRepository.save(order);
 
-		// クーポンを使用済みに更新
+		// クーポンを適用し、使用済みに更新
+		int discountRate = 0;
 		if (orderForm.getCouponId() != null && orderForm.getCouponId() != 0) {
+			// クーポンIDからクーポン情報を取得し、所有者チェックを行う
 			UserCoupon coupon = userCouponRepository.findById(orderForm.getCouponId()).orElse(null);
-			if (coupon != null && coupon.getIsUsed() == 0) {
+			if (coupon != null && coupon.getIsUsed() == 0 && coupon.getUser().getId().equals(user.getId())) {
+				discountRate = coupon.getDiscountRate();
 				coupon.setIsUsed(1); // 使用済み
 				userCouponRepository.save(coupon);
 			}
 		}
+		order.setDiscountRate(discountRate);
+		order = orderRepository.save(order);
 
 		//		注文詳細tableへの登録と商品の在庫の更新
 		for (BasketBean basketBean : basketList) {

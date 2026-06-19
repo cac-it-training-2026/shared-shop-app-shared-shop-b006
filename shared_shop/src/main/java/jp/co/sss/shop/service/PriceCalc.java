@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import jp.co.sss.shop.bean.OrderItemBean;
+import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 
 /**
@@ -73,5 +74,16 @@ public class PriceCalc {
 		}
 
 		return total;
+	}
+
+	/**
+	 * Orderエンティティから、割引適用後の合計金額を計算
+	 * @param order 注文エンティティ
+	 * @return 割引後の合計金額
+	 */
+	public int calculateOrderTotal(Order order) {
+		int subtotal = orderItemPriceTotal(order.getOrderItemsList());
+		int discountRate = (order.getDiscountRate() != null) ? order.getDiscountRate() : 0;
+		return calculateDiscountedPrice(subtotal, discountRate);
 	}
 }

@@ -67,6 +67,12 @@ public class Order {
 	private Date insertDate;
 
 	/**
+	 * 割引率
+	 */
+	@Column
+	private Integer discountRate;
+
+	/**
 	 * 会員情報
 	 */
 	@ManyToOne
@@ -189,6 +195,22 @@ public class Order {
 	 */
 	public void setInsertDate(Date insertDate) {
 		this.insertDate = insertDate;
+	}
+
+	/**
+	 * 割引率の取得
+	 * @return 割引率
+	 */
+	public Integer getDiscountRate() {
+		return discountRate;
+	}
+
+	/**
+	 * 割引率のセット
+	 * @param discountRate 割引率
+	 */
+	public void setDiscountRate(Integer discountRate) {
+		this.discountRate = discountRate;
 	}
 
 	/**

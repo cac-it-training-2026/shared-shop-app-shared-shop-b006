@@ -3,7 +3,10 @@
 -- 1. usersテーブルに最後にルーレットを実行した日付を保存するカラムを追加
 ALTER TABLE users ADD last_roulette_date DATE;
 
--- 2. user_couponsテーブルを新規作成
+-- 2. ordersテーブルに割引率を保存するカラムを追加
+ALTER TABLE orders ADD discount_rate NUMBER(3) DEFAULT 0 NOT NULL;
+
+-- 3. user_couponsテーブルを新規作成
 CREATE TABLE user_coupons (
     id NUMBER(10) PRIMARY KEY,
     user_id NUMBER(10) NOT NULL,
@@ -14,10 +17,11 @@ CREATE TABLE user_coupons (
     CONSTRAINT fk_user_coupons_user_id FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- 3. user_couponsテーブル用のシーケンスを作成
+-- 4. user_couponsテーブル用のシーケンスを作成
 CREATE SEQUENCE seq_user_coupons START WITH 1 INCREMENT BY 1;
 
 COMMENT ON COLUMN users.last_roulette_date IS '最後にルーレットを実行した日付';
+COMMENT ON COLUMN orders.discount_rate IS '適用された割引率(%)';
 COMMENT ON TABLE user_coupons IS 'ユーザー獲得クーポン情報';
 COMMENT ON COLUMN user_coupons.id IS 'クーポンID';
 COMMENT ON COLUMN user_coupons.user_id IS 'ユーザーID';
