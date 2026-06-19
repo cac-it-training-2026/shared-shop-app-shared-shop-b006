@@ -24,6 +24,13 @@
 			    <img th:src="@{/images/{image}(image=${item.image})}" th:if="${item.image != null}" />
 			    <img th:src="@{/images/common/no_image.jpg}" th:if="${item.image == null}" />
 			</a>
+			<div class="item_review">
+				<span th:if="${item.reviewCount > 0}">
+					★<span th:text="${#numbers.formatDecimal(item.averageRating, 1, 1)}"></span>
+					(<span th:text="${item.reviewCount}"></span>)
+				</span>
+				<span th:if="${item.reviewCount == 0}" th:text="#{review.none.short}">評価なし</span>
+			</div>
 		</div>
 	</div>
 	</th:block>

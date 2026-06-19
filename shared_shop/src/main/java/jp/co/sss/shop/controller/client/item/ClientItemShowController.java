@@ -15,8 +15,10 @@ import jakarta.servlet.http.HttpSession; // セッション判定用
 import jp.co.sss.shop.bean.ItemBean;
 import jp.co.sss.shop.entity.Category;
 import jp.co.sss.shop.entity.Item;
+import jp.co.sss.shop.entity.Review;
 import jp.co.sss.shop.repository.CategoryRepository;
 import jp.co.sss.shop.repository.ItemRepository;
+import jp.co.sss.shop.repository.ReviewRepository;
 import jp.co.sss.shop.service.BeanTools;
 import jp.co.sss.shop.util.Constant;
 
@@ -43,6 +45,12 @@ public class ClientItemShowController {
 	 */
 	@Autowired
 	BeanTools beanTools;
+
+	/**
+	 * レビュー情報 リポジトリ
+	 */
+	@Autowired
+	ReviewRepository reviewRepository;
 
 	//	/**
 	//	 * サイドバー表示用の共通処理
@@ -211,7 +219,14 @@ public class ClientItemShowController {
 			return "redirect:/syserror";
 		}
 		ItemBean itemBean = beanTools.copyEntityToItemBean(item);
+
+		// レビュー一覧を取得
+		List<Review> reviewList = reviewRepository.findByItemIdAndDeleteFlagOrderByInsertDateDesc(id,
+				Constant.NOT_DELETED);
+
 		model.addAttribute("item", itemBean);
+		model.addAttribute("reviews", reviewList);
+
 		return "client/item/detail";
 	}
 }
