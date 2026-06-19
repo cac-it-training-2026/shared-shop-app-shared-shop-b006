@@ -7,9 +7,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jp.co.sss.shop.bean.UserBean;
+import jp.co.sss.shop.entity.User;
 import jp.co.sss.shop.form.LoginForm;
 import jp.co.sss.shop.repository.UserRepository;
 import jp.co.sss.shop.util.Constant;
@@ -72,8 +76,17 @@ public class LoginController {
 			//セッションスコープから権限を取り出す
 			Integer authority = ((UserBean) session.getAttribute("user")).getAuthority();
 			if (authority.intValue() == Constant.AUTH_CLIENT) {
-				// 一般会員ログインした場合、トップ画面表示処理にリダイレクト
-				returnStr = "redirect:/";
+				// 一般会員の場合、ルーレット実行が必要か判定
+				User user = userRepository.getReferenceById(((UserBean) session.getAttribute("user")).getId());
+				Date today = Date.valueOf(LocalDate.now());
+
+				if (user.getLastRouletteDate() == null || !user.getLastRouletteDate().equals(today)) {
+					// その日初めてのログインならルーレット画面へ
+					returnStr = "redirect:/client/roulette";
+				} else {
+					// 既に実行済みならトップ画面へ
+					returnStr = "redirect:/";
+				}
 			} else {
 
 				// 運用管理者、もしくはシステム管理者としてログインした場合、管理者用メニュー画面表示処理にリダイレクト
