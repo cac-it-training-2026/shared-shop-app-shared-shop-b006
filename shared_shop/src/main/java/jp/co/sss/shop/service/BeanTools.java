@@ -208,6 +208,7 @@ public class BeanTools {
 		for (OrderItem orderItem : orderItemList) {
 			OrderItemBean orderItemBean = new OrderItemBean();
 
+			orderItemBean.setId(orderItem.getItem().getId());
 			orderItemBean.setName(orderItem.getItem().getName());
 			orderItemBean.setPrice(orderItem.getPrice());
 			orderItemBean.setOrderNum(orderItem.getQuantity());
