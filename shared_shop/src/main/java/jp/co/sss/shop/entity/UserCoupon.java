@@ -38,19 +38,19 @@ public class UserCoupon {
 	/**
 	 * 割引率
 	 */
-	@Column
+	@Column(name = "discount_rate")
 	private Integer discountRate;
 
 	/**
 	 * 使用済みフラグ 0:未使用、1:使用済み
 	 */
-	@Column
+	@Column(name = "is_used")
 	private Integer isUsed;
 
 	/**
 	 * 有効期限
 	 */
-	@Column
+	@Column(name = "expiry_date")
 	private Date expiryDate;
 
 	/**
