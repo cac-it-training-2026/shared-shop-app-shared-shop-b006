@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
+<head>
+<title>ログインルーレット | シェアードショップ</title>
+<meta charset="UTF-8" />
+</head>
+<body class="user">
+	<style>
+	.roulette-container {
+		text-align: center;
+		padding: 50px;
+	}
+	.wheel-wrapper {
+		position: relative;
+		width: 320px;
+		height: 320px;
+		margin: 20px auto;
+	}
+	.roulette-wheel {
+		width: 300px;
+		height: 300px;
+		border: 10px solid #333;
+		border-radius: 50%;
+		background: conic-gradient(
+			#ff6b6b 0% 1%,
+			#feca57 1% 5%,
+			#48dbfb 5% 20%,
+			#1dd1a1 20% 50%,
+			#ccc 50% 100%
+		);
+		transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+	}
+	.pointer {
+		position: absolute;
+		top: -20px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 0;
+		height: 0;
+		border-left: 15px solid transparent;
+		border-right: 15px solid transparent;
+		border-top: 30px solid #333;
+		z-index: 10;
+	}
+	.button-area {
+		margin-top: 30px;
+	}
+	.button:disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
+	}
+	</style>
+
+	<div class="roulette-container">
+		<h2 class="title">1日1回限定！ログインルーレット</h2>
+		<p>ログインありがとうございます！クーポンが当たるルーレットに挑戦しましょう。</p>
+
+		<div class="wheel-wrapper">
+			<div class="pointer"></div>
+			<div class="roulette-wheel" id="wheel"></div>
+		</div>
+
+		<div class="button-area">
+			<form th:action="@{/client/roulette/run}" method="post" id="rouletteForm">
+				<input type="button" value="ルーレットを回す！" class="button" id="spinButton" onclick="spinWheel()" />
+			</form>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+		function spinWheel() {
+			const wheel = document.getElementById('wheel');
+			const button = document.getElementById('spinButton');
+			const form = document.getElementById('rouletteForm');
+
+			// ボタンを無効化
+			button.disabled = true;
+			button.value = '抽選中...';
+
+			// ランダムに回転数を決定（最低5回転 + ランダムな角度）
+			const randomDegree = Math.floor(Math.random() * 360);
+			const totalDegree = 1800 + randomDegree;
+
+			// アニメーション実行
+			wheel.style.transform = `rotate(${totalDegree}deg)`;
+
+			// アニメーション終了後にフォームを送信
+			setTimeout(() => {
+				form.submit();
+			}, 4500);
+		}
+	</script>
+</body>
+</html>

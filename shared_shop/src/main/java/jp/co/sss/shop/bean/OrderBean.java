@@ -28,6 +28,11 @@ public class OrderBean {
 	private Integer total;
 
 	/**
+	 * 割引率
+	 */
+	private Integer discountRate;
+
+	/**
 	 * お届け先郵便番号
 	 */
 	private String postalCode;
@@ -114,6 +119,22 @@ public class OrderBean {
 	 */
 	public void setTotal(Integer total) {
 		this.total = total;
+	}
+
+	/**
+	 * 割引率の取得
+	 * @return 割引率
+	 */
+	public Integer getDiscountRate() {
+		return discountRate;
+	}
+
+	/**
+	 * 割引率のセット
+	 * @param discountRate 割引率
+	 */
+	public void setDiscountRate(Integer discountRate) {
+		this.discountRate = discountRate;
 	}
 
 	/**
