@@ -84,7 +84,7 @@ public class User {
 	/**
 	 * 最後にルーレットを実行した日付
 	 */
-	@Column
+	@Column(name = "last_roulette_date")
 	private Date lastRouletteDate;
 
 	/**

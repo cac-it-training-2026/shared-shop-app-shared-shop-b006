@@ -69,7 +69,7 @@ public class Order {
 	/**
 	 * 割引率
 	 */
-	@Column
+	@Column(name = "discount_rate")
 	private Integer discountRate;
 
 	/**
