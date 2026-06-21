@@ -25,7 +25,31 @@
             </tr>
             <tr>
                 <th th:text="#{review.displayName}">表示名</th>
-                <td><input type="text" th:field="*{displayName}" /></td>
+                <td>
+                    <input type="text" th:field="*{displayName}" id="displayNameInput" />
+                    <label style="margin-left: 10px;">
+                        <input type="checkbox" th:field="*{isAnonymous}" id="anonymousCheck" value="true" />
+                        <span th:text="#{review.anonymous}">匿名で投稿する</span>
+                    </label>
+                    <script>
+                        document.getElementById('anonymousCheck').addEventListener('change', function() {
+                            var nameInput = document.getElementById('displayNameInput');
+                            if (this.checked) {
+                                nameInput.setAttribute('readonly', 'readonly');
+                                nameInput.style.backgroundColor = '#e9ecef';
+                            } else {
+                                nameInput.removeAttribute('readonly');
+                                nameInput.style.backgroundColor = '';
+                            }
+                        });
+                        // 初期状態の設定
+                        if (document.getElementById('anonymousCheck').checked) {
+                            var nameInput = document.getElementById('displayNameInput');
+                            nameInput.setAttribute('readonly', 'readonly');
+                            nameInput.style.backgroundColor = '#e9ecef';
+                        }
+                    </script>
+                </td>
             </tr>
             <tr>
                 <th th:text="#{review.title}">タイトル</th>

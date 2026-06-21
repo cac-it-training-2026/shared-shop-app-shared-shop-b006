@@ -48,8 +48,11 @@
 			<div th:each="review : ${reviews}" class="review_item">
 				<hr />
 				<div class="review_header">
-					<span th:text="${review.rating}" class="review_rating"></span>
-					<span th:text="${review.title}" class="review_title"></span>
+					<span class="review_rating" style="color: #ff9900;">
+						<span th:text="${#strings.repeat('★', review.rating)}"></span><span th:text="${#strings.repeat('☆', 5 - review.rating)}"></span>
+					</span>
+					<span th:text="${review.rating}"></span>
+					<span th:text="${review.title}" class="review_title" style="margin-left: 10px; font-weight: bold;"></span>
 				</div>
 				<div class="review_info">
 					<span th:text="${review.displayName}"></span> |

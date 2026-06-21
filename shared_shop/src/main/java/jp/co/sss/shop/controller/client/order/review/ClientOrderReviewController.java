@@ -145,7 +145,15 @@ public class ClientOrderReviewController {
 		}
 
 		// 画面入力値をセッションのReviewFormに反映
-		sessionForm.setDisplayName(reviewForm.getDisplayName());
+		if (reviewForm.getIsAnonymous() != null && reviewForm.getIsAnonymous()) {
+			// メッセージプロパティを使いたいところだが、固定文字列で匿名ユーザーをセットするか、
+			// HTML側で#messagesを利用させる。ここではFormのdisplayNameを書き換える
+			sessionForm.setDisplayName("匿名ユーザー");
+			sessionForm.setIsAnonymous(true);
+		} else {
+			sessionForm.setDisplayName(reviewForm.getDisplayName());
+			sessionForm.setIsAnonymous(false);
+		}
 		sessionForm.setTitle(reviewForm.getTitle());
 		sessionForm.setBody(reviewForm.getBody());
 		sessionForm.setRating(reviewForm.getRating());

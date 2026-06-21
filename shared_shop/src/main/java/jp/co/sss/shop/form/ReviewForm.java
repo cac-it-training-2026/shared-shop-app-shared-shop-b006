@@ -33,6 +33,11 @@ public class ReviewForm implements Serializable {
 	private String displayName;
 
 	/**
+	 * 匿名フラグ
+	 */
+	private Boolean isAnonymous;
+
+	/**
 	 * タイトル
 	 */
 	@NotBlank
@@ -153,5 +158,21 @@ public class ReviewForm implements Serializable {
 	 */
 	public void setRating(Integer rating) {
 		this.rating = rating;
+	}
+
+	/**
+	 * 匿名フラグの取得
+	 * @return 匿名フラグ
+	 */
+	public Boolean getIsAnonymous() {
+		return isAnonymous;
+	}
+
+	/**
+	 * 匿名フラグのセット
+	 * @param isAnonymous 匿名フラグ
+	 */
+	public void setIsAnonymous(Boolean isAnonymous) {
+		this.isAnonymous = isAnonymous;
 	}
 }
