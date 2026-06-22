@@ -26,22 +26,6 @@
 				</select> <input type="submit" th:value="#{select}" />
 			</form>
 		</div>
-		<br/>
-		<h2 th:class="title">商品名検索</h2>
-		<div class="form">
-			<form th:action="@{/client/item/search}" method="get">
-				<input type="text" name="itemName" th:value="${itemName}" placeholder="キーワードを入力" />
-				<input type="submit" th:value="#{select}" />
-			</form>
-		</div>
-		<div th:if="${session.searchHistory != null and !#lists.isEmpty(session.searchHistory)}" class="search_history">
-			<p style="font-size: 0.8em; margin-top: 10px; font-weight: bold;">最近の検索履歴:</p>
-			<ul style="font-size: 0.8em; list-style: none; padding-left: 5px;">
-				<li th:each="history : ${session.searchHistory}">
-					<a th:href="@{/client/item/search(itemName=${history})}" th:text="${history}"></a>
-				</li>
-			</ul>
-		</div>
 	</div>
 
 	<!--/* メニュー(運用管理者、及びシステム管理者用) */-->

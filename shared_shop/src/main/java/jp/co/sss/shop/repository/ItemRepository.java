@@ -86,14 +86,4 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 			"ORDER BY (SELECT COUNT(oi.id) FROM OrderItem oi WHERE oi.item.id = i.id) DESC, i.id DESC")
 	List<Item> findByCategoryIdAndDeleteFlagOrderBySalesDesc(@Param("categoryId") int categoryId,
 			@Param("deleteFlag") int deleteFlag);
-
-	/**
-	 * 商品名（あいまい検索）と削除フラグを条件に検索
-	 * @param name 商品名（キーワード）
-	 * @param deleteFlag 削除フラグ
-	 * @return 商品エンティティのリスト
-	 */
-	@Query("SELECT i FROM Item i WHERE i.name LIKE %:name% AND i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
-	List<Item> findByNameContainingAndDeleteFlagOrderByInsertDateDesc(@Param("name") String name,
-			@Param("deleteFlag") int deleteFlag);
 }
