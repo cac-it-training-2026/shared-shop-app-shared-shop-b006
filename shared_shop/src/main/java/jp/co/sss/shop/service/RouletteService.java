@@ -13,6 +13,27 @@ import org.springframework.stereotype.Service;
 public class RouletteService {
 
 	/**
+	 * ルーレット結果を保持するクラス
+	 */
+	public static class RouletteResult {
+		private int winningNumber;
+		private int discountRate;
+
+		public RouletteResult(int winningNumber, int discountRate) {
+			this.winningNumber = winningNumber;
+			this.discountRate = discountRate;
+		}
+
+		public int getWinningNumber() {
+			return winningNumber;
+		}
+
+		public int getDiscountRate() {
+			return discountRate;
+		}
+	}
+
+	/**
 	 * 当選する割引率をランダムに決定する
 	 *
 	 * 1等: 50% (1%)
@@ -24,19 +45,31 @@ public class RouletteService {
 	 * @return 当選した割引率(%)
 	 */
 	public int determineDiscountRate() {
+		return determineRouletteResult().getDiscountRate();
+	}
+
+	/**
+	 * ルーレットの結果（当選番号と割引率）を決定する
+	 *
+	 * @return ルーレット結果
+	 */
+	public RouletteResult determineRouletteResult() {
 		Random rand = new Random();
 		int num = rand.nextInt(100); // 0-99
+		int discountRate;
 
 		if (num < 1) {
-			return 50; // 1等
+			discountRate = 50; // 1等
 		} else if (num < 5) {
-			return 30; // 2等
+			discountRate = 30; // 2等
 		} else if (num < 20) {
-			return 20; // 3等
+			discountRate = 20; // 3等
 		} else if (num < 50) {
-			return 10; // 4等
+			discountRate = 10; // 4等
 		} else {
-			return 5; // 5等
+			discountRate = 5; // 5等
 		}
+
+		return new RouletteResult(num, discountRate);
 	}
 }

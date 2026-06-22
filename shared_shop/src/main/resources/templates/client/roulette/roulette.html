@@ -69,26 +69,58 @@
 	</div>
 
 	<script th:inline="javascript">
-		function spinWheel() {
+		async function spinWheel() {
 			const wheel = document.getElementById('wheel');
 			const button = document.getElementById('spinButton');
-			const form = document.getElementById('rouletteForm');
 
 			// ボタンを無効化
 			button.disabled = true;
 			button.value = '抽選中...';
 
-			// ランダムに回転数を決定（最低5回転 + ランダムな角度）
-			const randomDegree = Math.floor(Math.random() * 360);
-			const totalDegree = 1800 + randomDegree;
+			try {
+				// サーバーから結果を取得
+				const response = await fetch(/*[[@{/client/roulette/run}]]*/ '/shared_shop/client/roulette/run', {
+					method: 'POST',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				});
 
-			// アニメーション実行
-			wheel.style.transform = `rotate(${totalDegree}deg)`;
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
 
-			// アニメーション終了後にフォームを送信
-			setTimeout(() => {
-				form.submit();
-			}, 4500);
+				const text = await response.text();
+				if (!text || text.trim() === '') {
+					// 既に実行済みなどの場合
+					window.location.href = /*[[@{/}]]*/ '/shared_shop/';
+					return;
+				}
+
+				const result = JSON.parse(text);
+
+				const winningNumber = result.winningNumber;
+
+				// 当選番号に基づいて回転角度を計算
+				// 各1%が3.6度。中心を狙うために+1.8度。
+				// サーバーの結果とビジュアルを一致させるため、(360 - 角度)分回転させる
+				const stopDegree = 360 - (winningNumber * 3.6 + 1.8);
+				const totalDegree = 1800 + stopDegree; // 最低5回転
+
+				// アニメーション実行
+				wheel.style.transform = `rotate(${totalDegree}deg)`;
+
+				// アニメーション終了後に結果画面へ遷移
+				setTimeout(() => {
+					window.location.href = /*[[@{/client/roulette/result}]]*/ '/shared_shop/client/roulette/result';
+				}, 4500);
+
+			} catch (error) {
+				console.error('Error:', error);
+				alert('通信エラーが発生しました。');
+				button.disabled = false;
+				button.value = 'ルーレットを回す！';
+			}
 		}
 	</script>
 </body>
