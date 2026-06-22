@@ -1,6 +1,7 @@
 package jp.co.sss.shop.entity;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -82,10 +83,20 @@ public class User {
 	private Date insertDate;
 
 	/**
+	 * 連続ログイン失敗回数
+	 */
+	@Column(insertable = false)
+	private Integer loginFailCount;	/**
+	 * ロック解除予定時刻
+	 */
+	@Column
+	private LocalDateTime lockTime;
+
+	/**
 	 * 最後にルーレットを実行した日付
 	 */
 	@Column(name = "last_roulette_date")
-	private Date lastRouletteDate;
+	private java.sql.Date lastRouletteDate;
 
 	/**
 	 * 会員IDの取得
@@ -248,10 +259,42 @@ public class User {
 	}
 
 	/**
+	 * 連続ログイン失敗回数の取得
+	 * @return 連続ログイン失敗回数
+	 */
+	public Integer getLoginFailCount() {
+		return loginFailCount;
+	}
+
+	/**
+	 * 連続ログイン失敗回数のセット
+	 * @param loginFailCount 連続ログイン失敗回数
+	 */
+	public void setLoginFailCount(Integer loginFailCount) {
+		this.loginFailCount = loginFailCount;
+	}
+
+	/**
+	 * ロック解除予定時刻の取得
+	 * @return ロック解除予定時刻
+	 */
+	public LocalDateTime getLockTime() {
+		return lockTime;
+	}
+
+	/**
+	 * ロック解除予定時刻のセット
+	 * @param lockTime ロック解除予定時刻
+	 */
+	public void setLockTime(LocalDateTime lockTime) {
+		this.lockTime = lockTime;
+	}
+
+	/**
 	 * 最後にルーレットを実行した日付の取得
 	 * @return 最後にルーレットを実行した日付
 	 */
-	public Date getLastRouletteDate() {
+	public java.sql.Date getLastRouletteDate() {
 		return lastRouletteDate;
 	}
 
@@ -259,7 +302,7 @@ public class User {
 	 * 最後にルーレットを実行した日付のセット
 	 * @param lastRouletteDate 最後にルーレットを実行した日付
 	 */
-	public void setLastRouletteDate(Date lastRouletteDate) {
+	public void setLastRouletteDate(java.sql.Date lastRouletteDate) {
 		this.lastRouletteDate = lastRouletteDate;
 	}
 }

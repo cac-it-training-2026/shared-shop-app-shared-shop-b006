@@ -39,12 +39,4 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 	Page<Order> findByUserIdAndPayMethodIsNotNullOrderByInsertDateDescIdDesc(@Param("userId") Integer userId,
 			Pageable pageable);
 
-	/**
-	 * 3. 【追加】注文詳細表示
-	 * (他人の注文や、まだ確定していないカート状態のデータをURL直打ちで見られないようにガード)
-	 * * @param id 注文ID
-	 * @param userId ログインユーザーのID
-	 * @return 該当する確定済注文（存在しない場合は空のOptional）
-	 */
-	Optional<Order> findByIdAndUserIdAndPayMethodIsNotNull(Integer id, Integer userId);
 }

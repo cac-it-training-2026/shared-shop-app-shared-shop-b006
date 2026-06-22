@@ -31,6 +31,7 @@
 				<th th:text="#{data.item.name}"></th>
 				<th th:text="#{data.item.price}"></th>
 				<th th:text="#{category}"></th>
+				<th th:text="#{review.rating}"></th>
 			</tr>
 			<!--/* 商品一覧 */-->
 			<tr th:each="item, status: ${items}">
@@ -42,6 +43,13 @@
 				<td><a th:href="@{/client/item/detail/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
 				<td th:text="${item.price}"></td>
 				<td th:text="${item.categoryName}"></td>
+				<td>
+					<span th:if="${item.reviewCount > 0}">
+						★<span th:text="${#numbers.formatDecimal(item.averageRating, 1, 1)}"></span>
+						(<span th:text="${item.reviewCount}"></span>)
+					</span>
+					<span th:if="${item.reviewCount == 0}" th:text="#{review.none.short}">評価なし</span>
+				</td>
 			</tr>
 		</table>
 	</th:block>

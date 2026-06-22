@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import jp.co.sss.shop.bean.OrderItemBean;
-import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
+import jp.co.sss.shop.entity.Order;
 
 /**
  * 料金計算用クラス
@@ -50,16 +50,6 @@ public class PriceCalc {
 	}
 
 	/**
-	 * 割引を適用した合計金額を計算
-	 * @param total 合計金額
-	 * @param discountRate 割引率(%)
-	 * @return 割引後の合計金額
-	 */
-	public int calculateDiscountedPrice(int total, int discountRate) {
-		return (int) (total * (1.0 - (discountRate / 100.0)));
-	}
-
-	/**
 	 * 注文時の単価と商品個数の合計金額を計算
 	 *
 	 * @param list
@@ -74,6 +64,16 @@ public class PriceCalc {
 		}
 
 		return total;
+	}
+
+	/**
+	 * 割引を適用した合計金額を計算
+	 * @param total 合計金額
+	 * @param discountRate 割引率(%)
+	 * @return 割引後の合計金額
+	 */
+	public int calculateDiscountedPrice(int total, int discountRate) {
+		return (int) (total * (1.0 - (discountRate / 100.0)));
 	}
 
 	/**

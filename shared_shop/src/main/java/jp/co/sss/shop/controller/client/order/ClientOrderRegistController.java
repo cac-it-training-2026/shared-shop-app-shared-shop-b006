@@ -25,12 +25,14 @@ import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.entity.User;
 import jp.co.sss.shop.entity.UserCoupon;
+import java.time.LocalDate;
+import java.sql.Date;
 import jp.co.sss.shop.form.OrderForm;
 import jp.co.sss.shop.repository.ItemRepository;
 import jp.co.sss.shop.repository.OrderItemRepository;
 import jp.co.sss.shop.repository.OrderRepository;
-import jp.co.sss.shop.repository.UserCouponRepository;
 import jp.co.sss.shop.repository.UserRepository;
+import jp.co.sss.shop.repository.UserCouponRepository;
 import jp.co.sss.shop.service.PriceCalc;
 
 /**
@@ -59,9 +61,6 @@ public class ClientOrderRegistController {
 	@Autowired
 	UserCouponRepository userCouponRepository;
 
-	/**
-	 * 料金計算サービス
-	 */
 	@Autowired
 	PriceCalc priceCalc;
 
@@ -152,13 +151,6 @@ public class ClientOrderRegistController {
 
 		model.addAttribute("orderForm", orderForm);
 		model.addAttribute("payMethod", orderForm.getPayMethod());
-
-		UserBean loginUser = (UserBean) session.getAttribute("user");
-		User user = userRepository.getReferenceById(loginUser.getId());
-		List<UserCoupon> coupons = userCouponRepository.findByUserAndIsUsedAndExpiryDateGreaterThanEqual(
-				user, 0, Date.valueOf(LocalDate.now()));
-		model.addAttribute("coupons", coupons);
-
 		return "client/order/payment_input";
 	}
 
@@ -175,7 +167,7 @@ public class ClientOrderRegistController {
 		}
 		OrderForm orderForm = (OrderForm) session.getAttribute("orderForm");
 		orderForm.setPayMethod(form.getPayMethod());
-		orderForm.setCouponId(form.getCouponId()); // 選択されたクーポンIDを保存
+		orderForm.setCouponId(form.getCouponId());
 		session.setAttribute("orderForm", orderForm);
 		return "redirect:/client/order/check";
 	}
@@ -269,6 +261,7 @@ public class ClientOrderRegistController {
 
 		if (basketList.size() != 0) {
 			model.addAttribute("orderItemBeans", orderItemBeans);
+			model.addAttribute("total", sum);
 
 			// 割引計算
 			int discountRate = 0;
@@ -335,19 +328,6 @@ public class ClientOrderRegistController {
 		BeanUtils.copyProperties(orderForm, order, "id", "insertDate", "orderItemsList", "user");
 		order.setInsertDate(Date.valueOf(LocalDate.now()));
 		order.setUser(user);
-
-		// クーポンを適用し、使用済みに更新
-		int discountRate = 0;
-		if (orderForm.getCouponId() != null && orderForm.getCouponId() != 0) {
-			// クーポンIDからクーポン情報を取得し、所有者チェックを行う
-			UserCoupon coupon = userCouponRepository.findById(orderForm.getCouponId()).orElse(null);
-			if (coupon != null && coupon.getIsUsed() == 0 && coupon.getUser().getId().equals(user.getId())) {
-				discountRate = coupon.getDiscountRate();
-				coupon.setIsUsed(1); // 使用済み
-				userCouponRepository.save(coupon);
-			}
-		}
-		order.setDiscountRate(discountRate);
 		order = orderRepository.save(order);
 
 		//		注文詳細tableへの登録と商品の在庫の更新

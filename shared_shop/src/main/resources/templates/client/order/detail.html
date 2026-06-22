@@ -49,25 +49,32 @@
 				<th>[[#{data.unit.price}]]</th>
 				<th>[[#{data.order.num}]]</th>
 				<th>[[#{data.subtotal}]]</th>
+				<th th:text="#{review}">レビュー</th>
 			</tr>
-			<tr th:each="orderItem: ${orderItemBeans}">
+						<tr th:each="orderItem, status : ${orderItemBeans}">
 				<td th:text="${orderItem.name}"></td>
 				<td th:text="${orderItem.price}"></td>
 				<td th:text="${orderItem.orderNum}"></td>
 				<td th:text="${orderItem.subtotal}"></td>
+				<td>
+					<span th:if="${reviewedList[status.index]}" th:text="#{review.already.posted}">投稿済み</span>
+					<a th:unless="${reviewedList[status.index]}"
+					   th:href="@{/client/order/review/regist/input/init(orderId=${order.id}, itemId=${orderItem.id})}"
+					   th:text="#{review.write}">レビューを書く</a>
+				</td>
 			</tr>
 			<tr>
-				<td colspan="2"></td>
+				<td colspan="3"></td>
 				<td class="total">小計</td>
 				<td class="total" th:text="${subtotalSum}"></td>
 			</tr>
 			<tr th:if="${discountRate > 0}">
-				<td colspan="2"></td>
+				<td colspan="3"></td>
 				<td class="total" style="color: #ff6b6b;">割引 ([[${discountRate}]]% OFF)</td>
 				<td class="total" style="color: #ff6b6b;" th:text="'-' + (${subtotalSum} - ${total})"></td>
 			</tr>
 			<tr>
-				<td colspan="2"></td>
+				<td colspan="3"></td>
 				<td class="total">[[#{data.total}]]</td>
 				<td class="total" th:text="${total}"></td>
 			</tr>

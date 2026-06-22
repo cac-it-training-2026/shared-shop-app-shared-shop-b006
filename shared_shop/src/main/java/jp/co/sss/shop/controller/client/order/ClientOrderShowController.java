@@ -20,6 +20,7 @@ import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.repository.OrderRepository;
+import jp.co.sss.shop.repository.ReviewRepository;
 import jp.co.sss.shop.service.BeanTools;
 import jp.co.sss.shop.service.PriceCalc;
 
@@ -55,6 +56,12 @@ public class ClientOrderShowController {
 	private BeanTools beanTools;
 
 	/**
+	 * レビュー情報 リポジトリ
+	 */
+	@Autowired
+	private ReviewRepository reviewRepository;
+
+	/**
 	 * 一覧取得、一覧画面表示 処理
 	 *
 	 * @param model Viewとの値受渡し
@@ -63,6 +70,10 @@ public class ClientOrderShowController {
 	 */
 	@RequestMapping(path = "/client/order/list", method = { RequestMethod.GET, RequestMethod.POST })
 	public String showOrderList(Model model, Pageable pageable) {
+
+		// セッションスコープのレビュー投稿用フォーム関連属性を削除
+		session.removeAttribute("reviewForm");
+		session.removeAttribute("result");
 
 		// セッションからログイン会員情報を取得
 		final UserBean loginUser = (UserBean) session.getAttribute("user");
@@ -80,6 +91,8 @@ public class ClientOrderShowController {
 		for (Order order : orderList) {
 			// BeanToolsクラスのcopyEntityToOrderBeanメソッドを使用して表示する注文情報を生成
 			OrderBean orderBean = beanTools.copyEntityToOrderBean(order);
+			// orderレコードから紐づくOrderItemのListを取り出す
+			List<OrderItem> orderItemList = order.getOrderItemsList();
 			// PriceCalcクラスのcalculateOrderTotalメソッドを使用して合計金額を算出
 			int total = priceCalc.calculateOrderTotal(order);
 
@@ -106,6 +119,10 @@ public class ClientOrderShowController {
 	@RequestMapping(path = "/client/order/detail/{id}", method = RequestMethod.GET)
 	public String showOrder(@PathVariable int id, Model model) {
 
+		// セッションスコープのレビュー投稿用フォーム関連属性を削除
+		session.removeAttribute("reviewForm");
+		session.removeAttribute("result");
+
 		// セッションからログイン会員情報を取得
 		final UserBean loginUser = (UserBean) session.getAttribute("user");
 		if (loginUser == null) {
@@ -113,10 +130,10 @@ public class ClientOrderShowController {
 		}
 
 		// 変更点：リポジトリのメソッドを使い、「注文ID」「ユーザーID」「支払方法が存在する（確定済）」の3条件で取得
-		Optional<Order> orderOpt = orderRepository.findByIdAndUserIdAndPayMethodIsNotNull(id, loginUser.getId());
+		Optional<Order> orderOpt = orderRepository.findById(id);
 
 		// 変更点：データが存在しない（他人のデータ、カート状態、または存在しないID）場合は安全にシステムエラーへ飛ばす
-		if (orderOpt.isEmpty()) {
+		if (orderOpt.isEmpty() || !orderOpt.get().getUser().getId().equals(loginUser.getId()) || orderOpt.get().getPayMethod() == null) {
 			return "redirect:/syserror";
 		}
 
@@ -128,6 +145,11 @@ public class ClientOrderShowController {
 
 		// 注文商品情報を取得
 		List<OrderItemBean> orderItemBeanList = beanTools.generateOrderItemBeanList(order.getOrderItemsList());
+
+		// レビュー投稿済みフラグを判定
+		List<Boolean> reviewedList = order.getOrderItemsList().stream()
+				.map(oi -> (Boolean) reviewRepository.existsByOrderIdAndItemIdAndDeleteFlag(order.getId(), oi.getItem().getId(), jp.co.sss.shop.util.Constant.NOT_DELETED))
+				.toList();
 
 		// 合計金額を算出
 		int total = priceCalc.calculateOrderTotal(order);
@@ -141,6 +163,7 @@ public class ClientOrderShowController {
 		// 注文情報をViewへ渡す
 		model.addAttribute("order", orderBean);
 		model.addAttribute("orderItemBeans", orderItemBeanList);
+		model.addAttribute("reviewedList", reviewedList);
 		model.addAttribute("total", total);
 
 		return "client/order/detail";
