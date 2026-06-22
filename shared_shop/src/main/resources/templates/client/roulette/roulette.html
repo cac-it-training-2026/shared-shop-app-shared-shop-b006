@@ -143,8 +143,6 @@
 				else segmentIndex = 4;
 
 				// 当選したセグメントの中心を狙う
-				// サーバーの結果とビジュアルを一致させるため、(360 - 角度)分回転させる
-				// 各セグメントは72度。中心は (index * 72 + 36)度。
 				const stopDegree = 360 - (segmentIndex * 72 + 36);
 				const totalDegree = 1800 + stopDegree; // 最低5回転
 
