@@ -55,7 +55,7 @@
 				<th>[[#{data.order.num}]]</th>
 				<th>[[#{data.subtotal}]]</th>
 			</tr>
-			<tr th:each="orderItem: ${orderItemBeans}">
+						<tr th:each="orderItem: ${orderItemBeans}">
 				<td th:text="${orderItem.name}"></td>
 				<td th:text="${orderItem.price}"></td>
 				<td th:text="${orderItem.orderNum}"></td>

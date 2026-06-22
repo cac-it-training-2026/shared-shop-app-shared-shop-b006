@@ -24,8 +24,7 @@ public class OrderBean {
 
 	/**
 	 * 合計金額
-	 */
-	private Integer total;
+	 */	private Integer total;
 
 	/**
 	 * 割引率
@@ -122,22 +121,6 @@ public class OrderBean {
 	}
 
 	/**
-	 * 割引率の取得
-	 * @return 割引率
-	 */
-	public Integer getDiscountRate() {
-		return discountRate;
-	}
-
-	/**
-	 * 割引率のセット
-	 * @param discountRate 割引率
-	 */
-	public void setDiscountRate(Integer discountRate) {
-		this.discountRate = discountRate;
-	}
-
-	/**
 	 * お届け先郵便番号の取得
 	 * @return お届け先郵便番号
 	 */
@@ -217,4 +200,20 @@ public class OrderBean {
 		this.userName = userName;
 	}
 
+
+	/**
+	 * 割引率の取得
+	 * @return 割引率
+	 */
+	public Integer getDiscountRate() {
+		return discountRate;
+	}
+
+	/**
+	 * 割引率のセット
+	 * @param discountRate 割引率
+	 */
+	public void setDiscountRate(Integer discountRate) {
+		this.discountRate = discountRate;
+	}
 }
