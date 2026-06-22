@@ -38,7 +38,6 @@ public class BeanTools {
 		BeanUtils.copyProperties(form, bean);
 
 		bean.setId(form.getId());
-		bean.setNameKana(form.getNameKana());
 
 		//		bean.setPrice(Integer.parseInt(form.getPrice()));
 
@@ -92,7 +91,6 @@ public class BeanTools {
 
 		bean.setCategoryId(entity.getCategory().getId());
 		bean.setCategoryName(entity.getCategory().getName());
-		bean.setNameKana(entity.getNameKana());
 
 		return bean;
 	}
@@ -129,7 +127,6 @@ public class BeanTools {
 
 		form.setCategoryId(entity.getCategory().getId());
 		form.setCategoryName(entity.getCategory().getName());
-		form.setNameKana(entity.getNameKana());
 		//	form.setPrice(entity.getPrice());
 		//	form.setStock(entity.getStock());
 
@@ -152,7 +149,6 @@ public class BeanTools {
 			if (entity.getCategory() != null) {
 				bean.setCategoryName(entity.getCategory().getName());
 			}
-			bean.setNameKana(entity.getNameKana());
 
 			beanList.add(bean);
 		}

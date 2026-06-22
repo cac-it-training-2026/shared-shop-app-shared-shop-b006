@@ -18,11 +18,6 @@ public class ItemBean {
 	private String name;
 
 	/**
-	 * 商品名（カナ）
-	 */
-	private String nameKana;
-
-	/**
 	 * 価格
 	 */
 	private Integer price;
@@ -82,22 +77,6 @@ public class ItemBean {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * 商品名（カナ）の取得
-	 * @return 商品名（カナ）
-	 */
-	public String getNameKana() {
-		return nameKana;
-	}
-
-	/**
-	 * 商品名（カナ）のセット
-	 * @param nameKana 商品名（カナ）
-	 */
-	public void setNameKana(String nameKana) {
-		this.nameKana = nameKana;
 	}
 
 	/**
