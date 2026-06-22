@@ -35,6 +35,13 @@ public class ItemForm implements Serializable {
 	private String name;
 
 	/**
+	 * 商品名（カナ）
+	 */
+	@NotBlank
+	@Size(min = 1, max = 200, message = "{text.maxsize.message}")
+	private String nameKana;
+
+	/**
 	 * 価格
 	 */
 	@NotNull
@@ -104,6 +111,22 @@ public class ItemForm implements Serializable {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * 商品名（カナ）の取得
+	 * @return 商品名（カナ）
+	 */
+	public String getNameKana() {
+		return nameKana;
+	}
+
+	/**
+	 * 商品名（カナ）のセット
+	 * @param nameKana 商品名（カナ）
+	 */
+	public void setNameKana(String nameKana) {
+		this.nameKana = nameKana;
 	}
 
 	/**

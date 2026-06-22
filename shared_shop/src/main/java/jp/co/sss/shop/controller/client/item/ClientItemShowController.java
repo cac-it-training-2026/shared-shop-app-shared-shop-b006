@@ -20,6 +20,7 @@ import jp.co.sss.shop.repository.CategoryRepository;
 import jp.co.sss.shop.repository.ItemRepository;
 import jp.co.sss.shop.service.BeanTools;
 import jp.co.sss.shop.util.Constant;
+import jp.co.sss.shop.util.JPStringUtil;
 
 /**
  * 商品管理 一覧表示機能(一般会員用)のコントローラクラス
@@ -214,6 +215,9 @@ public class ClientItemShowController {
 			Model model,
 			HttpSession session) {
 
+		// 検索キーワードの正規化（ひらがなをカタカナに変換して検索しやすくする）
+		String searchKeyword = JPStringUtil.hiraganaToKatakana(itemName);
+
 		// 検索履歴の取得と保存
 		@SuppressWarnings("unchecked")
 		List<String> searchHistory = (List<String>) session.getAttribute("searchHistory");
@@ -233,8 +237,8 @@ public class ClientItemShowController {
 		}
 
 		List<Item> itemList;
-		if (itemName != null && !itemName.isBlank()) {
-			itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(itemName,
+		if (searchKeyword != null && !searchKeyword.isBlank()) {
+			itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(searchKeyword,
 					Constant.NOT_DELETED);
 		} else {
 			// キーワード空の場合は全件（新着順）

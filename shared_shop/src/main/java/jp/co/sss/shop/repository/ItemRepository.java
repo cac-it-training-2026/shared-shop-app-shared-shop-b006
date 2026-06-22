@@ -89,11 +89,12 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
 	/**
 	 * 商品名（あいまい検索）と削除フラグを条件に検索
+	 * 商品名、または商品名（カナ）にキーワードが含まれるものを対象とする
 	 * @param name 商品名（キーワード）
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティのリスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.name LIKE %:name% AND i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
+	@Query("SELECT i FROM Item i WHERE (i.name LIKE %:name% OR i.nameKana LIKE %:name%) AND i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
 	List<Item> findByNameContainingAndDeleteFlagOrderByInsertDateDesc(@Param("name") String name,
 			@Param("deleteFlag") int deleteFlag);
 }
