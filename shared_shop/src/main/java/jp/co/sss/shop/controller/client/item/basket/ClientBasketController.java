@@ -89,12 +89,30 @@ public class ClientBasketController {
 				.filter(b -> b.getId().equals(id))
 				.findFirst();
 
+		final Optional<Item> itemOpt = itemRepository.findById(id);
+
+		if (itemOpt.isEmpty()) {
+			return "redirect:/client/basket/list";
+		}
+
+		final Item item = itemOpt.get();
+
 		// 同じ商品があるか確認
 		if (existingBean.isPresent()) {
 			final BasketBean basketBean = existingBean.get();
 
-			// 在庫不足 (追加時点のスナップショットと比較)
-			if (basketBean.getStock() < basketBean.getOrderNum() + orderNum) {
+			// 最新の在庫数で更新
+			basketBean.setStock(item.getStock());
+
+			// 在庫切れ
+			if (item.getStock() == 0) {
+				if (!itemNameListZero.contains(item.getName())) {
+					itemNameListZero.add(item.getName());
+				}
+				session.setAttribute("itemNameListZero", itemNameListZero);
+			}
+			// 在庫不足 (DBの最新在庫と比較)
+			else if (item.getStock() < basketBean.getOrderNum() + orderNum) {
 
 				@SuppressWarnings("unchecked")
 				List<String> itemNameListLessThan = (List<String>) session.getAttribute(
@@ -110,6 +128,9 @@ public class ClientBasketController {
 
 				session.setAttribute("itemNameListLessThan", itemNameListLessThan);
 
+				// 在庫数分まで追加
+				basketBean.setOrderNum(item.getStock());
+
 			}
 			// 在庫に余裕あり
 			else {
@@ -117,16 +138,9 @@ public class ClientBasketController {
 			}
 		} else {
 			// なければ新規追加
-			final Optional<Item> itemOpt = itemRepository.findById(id);
-
-			if (itemOpt.isEmpty()) {
-				return "redirect:/client/basket/list";
-			}
-
-			final Item item = itemOpt.get();
 
 			// 在庫切れ
-			if (item.getStock() == 0 || item.getStock() < orderNum) {
+			if (item.getStock() == 0) {
 
 				if (!itemNameListZero.contains(item.getName())) {
 					itemNameListZero.add(item.getName());
@@ -137,11 +151,28 @@ public class ClientBasketController {
 				return "redirect:/client/basket/list";
 			}
 
+			// 在庫不足
+			if (item.getStock() < orderNum) {
+				@SuppressWarnings("unchecked")
+				List<String> itemNameListLessThan = (List<String>) session.getAttribute(
+						"itemNameListLessThan");
+
+				if (itemNameListLessThan == null) {
+					itemNameListLessThan = new ArrayList<>();
+				}
+
+				if (!itemNameListLessThan.contains(item.getName())) {
+					itemNameListLessThan.add(item.getName());
+				}
+
+				session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+			}
+
 			final BasketBean basketBean = new BasketBean();
 			basketBean.setId(item.getId());
 			basketBean.setName(item.getName());
 			basketBean.setStock(item.getStock());
-			basketBean.setOrderNum(orderNum);
+			basketBean.setOrderNum(Math.min(item.getStock(), orderNum));
 
 			basketList.add(basketBean);
 		}
@@ -174,19 +205,40 @@ public class ClientBasketController {
 					.filter(b -> b.getId().equals(id))
 					.findFirst()
 					.ifPresent(basketBean -> {
-						// 在庫不足 (追加時点のスナップショットと比較)
-						if (basketBean.getStock() < quantity) {
-							@SuppressWarnings("unchecked")
-							List<String> itemNameListLessThan = (List<String>) session.getAttribute("itemNameListLessThan");
-							if (itemNameListLessThan == null) {
-								itemNameListLessThan = new ArrayList<>();
+						final Optional<Item> itemOpt = itemRepository.findById(id);
+						if (itemOpt.isPresent()) {
+							final Item item = itemOpt.get();
+							// 最新の在庫数で更新
+							basketBean.setStock(item.getStock());
+
+							// 在庫切れ
+							if (item.getStock() == 0) {
+								@SuppressWarnings("unchecked")
+								List<String> itemNameListZero = (List<String>) session.getAttribute("itemNameListZero");
+								if (itemNameListZero == null) {
+									itemNameListZero = new ArrayList<>();
+								}
+								if (!itemNameListZero.contains(item.getName())) {
+									itemNameListZero.add(item.getName());
+								}
+								session.setAttribute("itemNameListZero", itemNameListZero);
+								basketBean.setOrderNum(0);
 							}
-							if (!itemNameListLessThan.contains(basketBean.getName())) {
-								itemNameListLessThan.add(basketBean.getName());
+							// 在庫不足 (DBの最新在庫と比較)
+							else if (item.getStock() < quantity) {
+								@SuppressWarnings("unchecked")
+								List<String> itemNameListLessThan = (List<String>) session.getAttribute("itemNameListLessThan");
+								if (itemNameListLessThan == null) {
+									itemNameListLessThan = new ArrayList<>();
+								}
+								if (!itemNameListLessThan.contains(basketBean.getName())) {
+									itemNameListLessThan.add(basketBean.getName());
+								}
+								session.setAttribute("itemNameListLessThan", itemNameListLessThan);
+								basketBean.setOrderNum(item.getStock());
+							} else {
+								basketBean.setOrderNum(quantity);
 							}
-							session.setAttribute("itemNameListLessThan", itemNameListLessThan);
-						} else {
-							basketBean.setOrderNum(quantity);
 						}
 					});
 		}
