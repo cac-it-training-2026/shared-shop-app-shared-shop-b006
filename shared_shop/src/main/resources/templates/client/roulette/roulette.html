@@ -69,7 +69,7 @@
 	</div>
 
 	<script th:inline="javascript">
-		function spinWheel() {
+		async function spinWheel() {
 			const wheel = document.getElementById('wheel');
 			const button = document.getElementById('spinButton');
 			const form = document.getElementById('rouletteForm');
@@ -78,17 +78,89 @@
 			button.disabled = true;
 			button.value = '抽選中...';
 
-			// ランダムに回転数を決定（最低5回転 + ランダムな角度）
-			const randomDegree = Math.floor(Math.random() * 360);
-			const totalDegree = 1800 + randomDegree;
+			try {
+				// フォームデータを非同期で送信
+				const formData = new FormData(form);
+				const response = await fetch(form.action, {
+					method: form.method,
+					body: formData
+				});
 
-			// アニメーション実行
-			wheel.style.transform = `rotate(${totalDegree}deg)`;
+				// リダイレクトされた場合（二重実行防止やログイン画面）
+				if (response.redirected) {
+					window.location.href = response.url;
+					return;
+				}
 
-			// アニメーション終了後にフォームを送信
-			setTimeout(() => {
-				form.submit();
-			}, 4500);
+				const htmlText = await response.text();
+
+				// 結果ページから割引率を抽出
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(htmlText, 'text/html');
+				const badgeSpan = doc.querySelector('.discount-badge span');
+
+				if (!badgeSpan) {
+					// 割引率が見つからない場合はそのまま画面遷移
+					document.open();
+					document.write(htmlText);
+					document.close();
+					return;
+				}
+
+				const discountRate = parseInt(badgeSpan.textContent, 10);
+				let minDeg, maxDeg;
+
+				// 割引率に応じた角度の範囲を設定
+				// conic-gradient の設定に対応:
+				// 50%: 0-1% (0 - 3.6度)
+				// 30%: 1-5% (3.6 - 18度)
+				// 20%: 5-20% (18 - 72度)
+				// 10%: 20-50% (72 - 180度)
+				// 5%: 50-100% (180 - 360度)
+				switch (discountRate) {
+					case 50:
+						minDeg = 0; maxDeg = 3.6; break;
+					case 30:
+						minDeg = 3.6; maxDeg = 18; break;
+					case 20:
+						minDeg = 18; maxDeg = 72; break;
+					case 10:
+						minDeg = 72; maxDeg = 180; break;
+					case 5:
+					default:
+						minDeg = 180; maxDeg = 360; break;
+				}
+
+				// 指定範囲内でランダムな角度を決定（境界を少し避ける）
+				const padding = (maxDeg - minDeg) * 0.1;
+				const targetAngle = minDeg + padding + Math.random() * (maxDeg - minDeg - 2 * padding);
+
+				// 針が上部（0度）にあるため、ターゲットの角度を針に合わせるには 360 - targetAngle 回転させる
+				const stoppingAngle = 360 - targetAngle;
+
+				// 最低5回転 (1800度) + 停止角度
+				const totalDegree = 1800 + stoppingAngle;
+
+				// アニメーション実行
+				wheel.style.transform = `rotate(${totalDegree}deg)`;
+
+				// アニメーション終了後に結果画面へ遷移（DOMとURLを更新）
+				setTimeout(() => {
+					document.open();
+					document.write(htmlText);
+					document.close();
+					// history.pushState を行うと POST エンドポイントに GET でリロードされてしまうため、
+					// ブラウザのリロード対策として URL はそのまま (/client/roulette) にしておくか、リダイレクトするなどの対応が必要だが、
+					// 既存の動きに影響を与えないために pushState は削除します。
+				}, 4500);
+
+			} catch (error) {
+				console.error('Error during roulette spin:', error);
+				// すでに fetch が成功して結果が確定している可能性があるため、
+				// フォームの再送信ではなく、単にアラートなどでエラーを通知する
+				alert("エラーが発生しました。トップページに戻ります。");
+				window.location.href = "/shared_shop/";
+			}
 		}
 	</script>
 </body>
