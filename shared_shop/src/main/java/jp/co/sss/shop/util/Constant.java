@@ -54,4 +54,10 @@ public class Constant {
 	/** 権限の値(一般会員) */
 	public static final int AUTH_CLIENT = 2;
 
+	/** ログイン失敗回数の最大値 */
+	public static final int MAX_LOGIN_FAIL_COUNT = 5;
+
+	/** アカウントロック時間（分） */
+	public static final int ACCOUNT_LOCK_MINUTES = 30;
+
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
+<head>
+<title th:text="#{review.regist.check.title}">レビュー投稿確認</title>
+</head>
+<body>
+    <h2 th:text="#{review.regist.check.title}">レビュー投稿確認</h2>
+    <p th:text="#{review.regist.check.message}">以下の内容で投稿します。よろしいですか？</p>
+    <table class="detail_table">
+        <tr>
+            <th th:text="#{review.rating}">評価</th>
+            <td th:text="${reviewForm.rating}"></td>
+        </tr>
+        <tr>
+            <th th:text="#{review.displayName}">表示名</th>
+            <td th:text="${reviewForm.displayName}"></td>
+        </tr>
+        <tr>
+            <th th:text="#{review.title}">タイトル</th>
+            <td th:text="${reviewForm.title}"></td>
+        </tr>
+        <tr>
+            <th th:text="#{review.body}">本文</th>
+            <td th:text="${reviewForm.body}"></td>
+        </tr>
+    </table>
+    <div class="button_area">
+        <form th:action="@{/client/order/review/regist/complete}" method="post" class="inline_form">
+            <input type="submit" th:value="#{review.regist.complete}" class="send_button" />
+        </form>
+        <form th:action="@{/client/order/review/regist/input}" method="get" class="inline_form">
+            <input type="submit" th:value="#{back.to.input}" class="back_button" />
+        </form>
+    </div>
+</body>
+</html>

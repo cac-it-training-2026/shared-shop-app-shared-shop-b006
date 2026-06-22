@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jp.co.sss.shop.bean.BasketBean;
@@ -16,6 +17,7 @@ import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.form.ItemForm;
+import jp.co.sss.shop.util.Constant;
 
 /**
  * オブジェクト間でのフィールドコピー処理を行うクラス
@@ -24,6 +26,7 @@ import jp.co.sss.shop.form.ItemForm;
  */
 @Service
 public class BeanTools {
+
 	/**
 	 * ItemFormクラスの各フィールドの値をItemBeanクラスにコピー
 	 *
@@ -205,6 +208,7 @@ public class BeanTools {
 		for (OrderItem orderItem : orderItemList) {
 			OrderItemBean orderItemBean = new OrderItemBean();
 
+			orderItemBean.setId(orderItem.getItem().getId());
 			orderItemBean.setName(orderItem.getItem().getName());
 			orderItemBean.setPrice(orderItem.getPrice());
 			orderItemBean.setOrderNum(orderItem.getQuantity());
