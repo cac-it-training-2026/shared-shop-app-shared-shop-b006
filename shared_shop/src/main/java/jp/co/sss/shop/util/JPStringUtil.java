@@ -25,4 +25,25 @@ public class JPStringUtil {
 		}
 		return sb.toString();
 	}
+
+	/**
+	 * カタカナをひらがなに変換する
+	 * @param input 変換対象の文字列
+	 * @return 変換後の文字列（カタカナがひらがなになったもの）
+	 */
+	public static String katakanaToHiragana(String input) {
+		if (input == null) {
+			return null;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < input.length(); i++) {
+			char c = input.charAt(i);
+			if (c >= '\u30A1' && c <= '\u30F6') {
+				sb.append((char) (c - 0x60));
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
 }

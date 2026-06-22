@@ -215,8 +215,10 @@ public class ClientItemShowController {
 			Model model,
 			HttpSession session) {
 
-		// 検索キーワードの正規化（ひらがなをカタカナに変換して検索しやすくする）
-		String searchKeyword = JPStringUtil.hiraganaToKatakana(itemName);
+		// 検索キーワードの各バリエーション生成（ひらがな、カタカナ、そのまま）
+		String searchKeyword = itemName;
+		String kanaKeyword = JPStringUtil.hiraganaToKatakana(itemName);
+		String hiraKeyword = JPStringUtil.katakanaToHiragana(itemName);
 
 		// 検索履歴の取得と保存
 		@SuppressWarnings("unchecked")
@@ -237,8 +239,8 @@ public class ClientItemShowController {
 		}
 
 		List<Item> itemList;
-		if (searchKeyword != null && !searchKeyword.isBlank()) {
-			itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(searchKeyword,
+		if (itemName != null && !itemName.isBlank()) {
+			itemList = itemRepository.findByNameContainingAcrossScripts(searchKeyword, kanaKeyword, hiraKeyword,
 					Constant.NOT_DELETED);
 		} else {
 			// キーワード空の場合は全件（新着順）
