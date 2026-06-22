@@ -34,8 +34,13 @@
 		</div>
 		<div class="detail_button_area">
 			<form th:action="@{/client/basket/add}" method="post" class="user_info_form" th:if="*{stock > 0}">
+				<span class="item_count">数量：
+					<input type="button" value="-" class="minus-btn" />
+					<input type="number" name="quantity" value="1" min="1" th:max="*{stock}" style="width: 40px; height: 25px; vertical-align: middle;" />
+					<input type="button" value="+" class="plus-btn" />
+				</span>
 				<input type="hidden" th:field="*{id}" />
-				<input type="submit" value="買い物かごに入れる" class="send_button" />
+				<input type="submit" value="買い物かごに入れる" class="send_button" style="vertical-align: middle;" />
 			</form>
 			<form th:action="@{/client/item/list/1}" method="post">
 				<input type="submit" value="戻る" class="back_button" />
