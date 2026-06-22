@@ -131,6 +131,10 @@ public class ClientOrderShowController {
 
 		// 変更点：リポジトリのメソッドを使い、「注文ID」「ユーザーID」「支払方法が存在する（確定済）」の3条件で取得
 		Optional<Order> orderOpt = orderRepository.findById(id);
+		if (orderOpt.isEmpty()) {
+			session.invalidate();
+			return "redirect:/login";
+		}
 
 		// Optionalからエンティティを取り出す
 		Order order = orderOpt.get();
