@@ -448,6 +448,12 @@
             font-size: 0.75rem;
             color: var(--text-muted);
         }
+        .screenshot-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
 
         /* Modal */
         .modal {
@@ -682,9 +688,9 @@
                     <p>直感的なUI、論理削除によるデータ保持、厳密な在庫管理など、実際のビジネスロジックを考慮した設計になっています。</p>
                 </div>
                 <div class="overview-card">
-                    <span class="overview-icon">📱</span>
+                    <span class="overview-icon">💻</span>
                     <h3>利用イメージ</h3>
-                    <p>PC・スマートフォンの両方で快適に操作可能。管理者画面も充実しており、商品の管理から注文状況の把握まで一目瞭然です。</p>
+                    <p>PC快適に操作可能。管理者画面も充実しており、商品の管理から注文状況の把握まで一目瞭然です。</p>
                 </div>
             </div>
         </div>
@@ -710,7 +716,7 @@
                     <div class="feature-icon-sm">🔍</div>
                     <div>
                         <h3>商品検索・詳細</h3>
-                        <p>キーワードやカテゴリでの絞り込み。見やすい詳細ページで商品の魅力を伝えます。</p>
+                        <p>商品名、カテゴリでの絞り込み。見やすい詳細ページで商品の魅力を伝えます。</p>
                     </div>
                 </div>
                 <div class="feature-item">
@@ -831,7 +837,7 @@
                 <div class="tech-card">
                     <h4>Tools</h4>
                     <div class="badge-list">
-                        <span class="badge">GitHub</span>
+                        <span class="badge highlight">GitHub</span>
                         <span class="badge">IntelliJ IDEA</span>
                         <span class="badge">Git</span>
                     </div>
@@ -900,9 +906,9 @@
                         <path d="M0 40 H180" stroke="var(--border)" stroke-width="2"/>
                         <text x="90" y="25" text-anchor="middle" font-weight="700" fill="var(--primary)">users</text>
                         <text x="15" y="65" font-size="12" fill="var(--text-main)">PK id</text>
-                        <text x="15" y="85" font-size="12" fill="var(--text-muted)">email</text>
-                        <text x="15" y="105" font-size="12" fill="var(--text-muted)">name</text>
-                        <text x="15" y="125" font-size="12" fill="var(--text-muted)">authority</text>
+                        <text x="15" y="85" font-size="12" fill="var(--text-muted)">Email</text>
+                        <text x="15" y="105" font-size="12" fill="var(--text-muted)">Name</text>
+                        <text x="15" y="125" font-size="12" fill="var(--text-muted)">Authority</text>
                     </g>
 
                     <g transform="translate(350, 50)">
@@ -996,11 +1002,11 @@
                 <div>
                     <a href="#" class="logo" style="margin-bottom: 1rem;">SharedShop Plus</a>
                     <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 300px;">
-                        みんなでつくる、やさしいECサイト。学習と成長のためのプラットフォーム。
+                        ６人で創る、やさしいECサイト。学習と成長のためのプラットフォーム。
                     </p>
                 </div>
                 <div class="footer-links">
-                    <a href="https://github.com/y-okuda-tis/sShop-repo">GitHub Repository</a>
+                    <a href="https://github.com/cac-it-training-2026/shared-shop-app-shared-shop-b006">GitHub Repository</a>
                     <a href="#hero">Top</a>
                     <a href="#features">Features</a>
                 </div>
@@ -1015,21 +1021,22 @@
         // Data for next steps
         //機能はここで書き換える
         const EXTRA_FEATURES = [
-            { name: "カスタムバリデーション", category: "セキュリティ", icon: "✅", desc: "独自アノテーションを用いた相関チェック（メール重複など）。" },
-            { name: "アクセス制御フィルター", category: "セキュリティ", icon: "🛡️", desc: "URLパターンと権限をマッピングした細やかなアクセス制限。" },
-            { name: "売れ筋順ソート", category: "商品系", icon: "🔥", desc: "注文明細の集計に基づいた人気ランキング機能。", label: "人気" },
-            { name: "ソフトデリート", category: "会員系", icon: "♻️", desc: "物理削除せずフラグで管理し、注文履歴との整合性を維持。" },
-            { name: "在庫連動注文制御", category: "注文系", icon: "⚡", desc: "注文確定直前に最新在庫を再チェックするダブルチェック設計。", label: "重要" }
+            { name: "アカウントロック", category: "セキュリティ", icon: "🛡️", desc: "６度ログインに失敗すると30分間ログイン不可" },
+            { name: "数量選択", category: "注文系", icon: "➕", desc: "商品購入時に数量を指定できる" ,label: "重要"},
+            { name: "商品名検索", category: "商品系", icon: "🧭", desc: "商品名でほしい商品を検索可能"},
+            { name: "レビュー機能", category: "会員系", icon: "🌟", desc: "物理削除せずフラグで管理し、注文履歴との整合性を維持。" },
+            { name: "ログインボーナス<br>クーポン", category: "会員系", icon: "🏷", desc: "毎日ログインでお得なクーポンがもらえるルーレットを回せる！" },
+            { name: "闇鍋<br>(隠しコマンド)", category: "商品系", icon: "❔", desc: "商品名検索で特定の検索をすると...?",label: "人気"  },
         ];
 
         const SCREENSHOTS = [
-            { title: "トップページ", label: "index.html", color: "#eff6ff" },
-            { title: "商品一覧", label: "item/list.html", color: "#ecfdf5" },
-            { title: "商品詳細", label: "item/detail.html", color: "#fff7ed" },
-            { title: "買い物かご", label: "basket/list.html", color: "#fef2f2" },
-            { title: "注文確認", label: "order/check.html", color: "#f5f3ff" },
-            { title: "注文履歴", label: "order/list.html", color: "#f0fdf4" },
-            { title: "管理画面", label: "admin/menu.html", color: "#fafaf9" }
+            { title: "トップページ", label: "index.html", color: "#eff6ff",image:"images/top.png" },
+            { title: "商品一覧", label: "item/list.html", color: "#ecfdf5" ,image:"images/item.png"},
+            { title: "商品詳細", label: "item/detail.html", color: "#fff7ed" ,image:"images/item_detail.png"},
+            { title: "買い物かご", label: "basket/list.html", color: "#fef2f2",image:"images/basket.png" },
+            { title: "注文確認", label: "order/check.html", color: "#f5f3ff" ,image:"images/order_check.png"},
+            { title: "注文履歴", label: "order/list.html", color: "#f0fdf4",image:"images/order.png" },
+            { title: "管理画面", label: "admin/menu.html", color: "#fafaf9" ,image:"images/admin.png"}
         ];
 
         const CRUD_DATA = [
@@ -1063,36 +1070,47 @@
         }
 
         // Render Screenshots
-        function renderScreenshots() {
-            const grid = document.getElementById('screenshots-grid');
-            grid.innerHTML = SCREENSHOTS.map((s, index) => `
-                <div class="screenshot-card-item" onclick="openModal(${index})">
-                    <div class="screenshot-placeholder" style="background-color: ${s.color};">
-                        <span style="font-size: 2rem; opacity: 0.3;">🖼️</span>
-                    </div>
-                    <div class="screenshot-info">
-                        <h3>${s.title}</h3>
-                        <code>${s.label}</code>
-                    </div>
-                </div>
-            `).join('');
-        }
+   function renderScreenshots() {
+    const grid = document.getElementById('screenshots-grid');
+
+    grid.innerHTML = SCREENSHOTS.map((s, index) => `
+        <div class="screenshot-card-item" onclick="openModal(${index})">
+            <div class="screenshot-placeholder">
+                <img src="${s.image}" alt="${s.title}" class="screenshot-image">
+            </div>
+            <div class="screenshot-info">
+                <h3>${s.title}</h3>
+                <code>${s.label}</code>
+            </div>
+        </div>
+    `).join('');
+}
 
         // Modal Logic
-        function openModal(index) {
-            const s = SCREENSHOTS[index];
-            const modal = document.getElementById('modal');
-            const placeholder = document.getElementById('modal-image-placeholder');
-            const title = document.getElementById('modal-title');
+function openModal(index) {
+    const s = SCREENSHOTS[index];
+    const modal = document.getElementById('modal');
+    const placeholder = document.getElementById('modal-image-placeholder');
+    const title = document.getElementById('modal-title');
 
-            placeholder.style.backgroundColor = s.color;
-            placeholder.innerHTML = '<span style="font-size: 4rem; opacity: 0.3;">🖼️</span>';
-            title.textContent = s.title;
+    placeholder.innerHTML = `
+        <img
+            src="${s.image}"
+            alt="${s.title}"
+            style="
+                width:100%;
+                height:100%;
+                object-fit:contain;
+                display:block;
+            "
+        >
+    `;
 
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+    title.textContent = s.title;
 
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
         function closeModal() {
             const modal = document.getElementById('modal');
             modal.style.display = 'none';
