@@ -75,6 +75,11 @@ public class ItemForm implements Serializable {
 	private String categoryName;
 
 	/**
+	 * 裏メニューフラグ
+	 */
+	private Integer isSecret;
+
+	/**
 	 * 商品ID取得
 	 * @return 商品ID
 	 */
@@ -216,5 +221,21 @@ public class ItemForm implements Serializable {
 	 */
 	public void setCategoryName(String categoryName) {
 		this.categoryName = categoryName;
+	}
+
+	/**
+	 * 裏メニューフラグの取得
+	 * @return 裏メニューフラグ
+	 */
+	public Integer getIsSecret() {
+		return isSecret;
+	}
+
+	/**
+	 * 裏メニューフラグのセット
+	 * @param isSecret 裏メニューフラグ
+	 */
+	public void setIsSecret(Integer isSecret) {
+		this.isSecret = isSecret;
 	}
 }

@@ -83,6 +83,9 @@ public class AdminOrderShowController {
 			//合計金額のセット
 			orderBean.setTotal(total);
 
+			// 注文商品情報リストをセット (管理者の注文一覧表示用)
+			orderBean.setOrderItemBeanList(beanTools.generateOrderItemBeanList(orderItemList));
+
 			orderBeanList.add(orderBean);
 		}
 

@@ -29,6 +29,8 @@
 				<dd th:text="*{stock}"></dd>
 				<dt>[[#{data.category}]]</dt>
 				<dd th:text="*{categoryName}"></dd>
+				<dt>裏メニューフラグ</dt>
+				<dd th:text="*{isSecret == 1 ? '裏メニュー' : '通常商品'}"></dd>
 				<dt>[[#{itemForm.description}]]</dt>
 				<dd th:text="*{description}"></dd>
 			</dl>

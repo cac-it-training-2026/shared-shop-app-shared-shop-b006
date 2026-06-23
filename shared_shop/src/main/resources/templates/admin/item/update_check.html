@@ -26,6 +26,10 @@
 				<span class="input_value" th:text="*{categoryName}"></span>
 			</li>
 			<li>
+				<span class="input_title">裏メニューフラグ</span>
+				<span class="input_value" th:text="*{isSecret == 1 ? '裏メニュー' : '通常商品'}"></span>
+			</li>
+			<li>
 				<span class="input_title">[[#{itemForm.stock}]]</span>
 				<span class="input_value" th:text="*{stock}"></span>
 			</li>

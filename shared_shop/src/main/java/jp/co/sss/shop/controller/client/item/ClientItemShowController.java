@@ -274,7 +274,7 @@ public class ClientItemShowController {
 
 		List<Item> itemList;
 		if (itemName != null && !itemName.isBlank()) {
-			if ("yaminabe".equals(itemName)) {
+			if ("yaminabe".equals(itemName.trim())) {
 				itemList = itemRepository.findByIsSecretAndDeleteFlag(1, Constant.NOT_DELETED);
 			} else {
 				itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(itemName,

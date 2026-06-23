@@ -56,7 +56,10 @@
 				<th>[[#{data.subtotal}]]</th>
 			</tr>
 			<tr th:each="orderItem: ${orderItemBeans}">
-				<td th:text="${orderItem.name}"></td>
+				<td>
+					<span th:if="${orderItem.isMystery == 1}" th:text="|${orderItem.name}（中身：${orderItem.mysteryItemName} 【${orderItem.mysteryItemRank}ランク】）|"></span>
+					<span th:unless="${orderItem.isMystery == 1}" th:text="${orderItem.name}"></span>
+				</td>
 				<td th:text="${orderItem.price}"></td>
 				<td th:text="${orderItem.orderNum}"></td>
 				<td th:text="${orderItem.subtotal}"></td>
