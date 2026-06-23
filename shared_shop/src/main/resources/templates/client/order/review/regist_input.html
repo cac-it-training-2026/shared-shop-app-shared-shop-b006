@@ -63,7 +63,7 @@
         <input type="submit" th:value="#{review.regist.check}" class="send_button" />
     </form>
     <div class="back_link">
-        <a th:href="@{/client/order/detail/{id}(id=*{orderId})}" th:text="#{back.to.orderDetail}">注文詳細へ戻る</a>
+        <a th:href="@{/client/order/detail/{id}(id=${reviewForm.orderId})}" th:text="#{back.to.orderDetail}">注文詳細へ戻る</a>
     </div>
 </body>
 </html>
