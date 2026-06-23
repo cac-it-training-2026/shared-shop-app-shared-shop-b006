@@ -34,12 +34,44 @@
 		</div>
 		<div class="detail_button_area">
 			<form th:action="@{/client/basket/add}" method="post" class="user_info_form" th:if="*{stock > 0}">
+				<span class="item_count">数量：
+					<input type="button" value="-" class="minus-btn" />
+					<input type="number" name="quantity" value="1" min="1" th:max="*{stock}" style="width: 40px; height: 25px; vertical-align: middle;" />
+					<input type="button" value="+" class="plus-btn" />
+				</span>
 				<input type="hidden" th:field="*{id}" />
-				<input type="submit" value="買い物かごに入れる" class="send_button" />
+				<input type="submit" value="買い物かごに入れる" class="send_button" style="vertical-align: middle;" />
 			</form>
 			<form th:action="@{/client/item/list/1}" method="post">
 				<input type="submit" value="戻る" class="back_button" />
 			</form>
+		</div>
+
+		<div class="review_area">
+			<h3 th:text="#{review.list.title}">カスタマーレビュー</h3>
+			<div th:if="${#lists.isEmpty(reviews)}" th:text="#{review.none}">まだレビューはありません。</div>
+			<div th:each="review : ${reviews}" class="review_item">
+				<hr />
+				<div class="review_header">
+					<span class="review_rating" style="color: #ff9900;">
+						<span th:text="${#strings.repeat('★', review.rating)}"></span><span th:text="${#strings.repeat('☆', 5 - review.rating)}"></span>
+					</span>
+					<span th:text="${review.rating}"></span>
+					<span th:text="${review.title}" class="review_title" style="margin-left: 10px; font-weight: bold;"></span>
+				</div>
+				<div class="review_info">
+					<span th:text="${review.displayName}"></span> |
+					<span th:text="${#dates.format(review.insertDate, 'yyyy/MM/dd')}"></span>
+				</div>
+				<div class="review_body" th:text="${review.body}"></div>
+				<div class="helpful_area">
+					<span th:text="|${review.helpfulCount} #{review.helpful.unit}|"></span>
+					<form th:action="@{/client/review/helpful}" method="post" class="inline_form" th:if="${session.user != null}">
+						<input type="hidden" name="reviewId" th:value="${review.id}" />
+						<input type="submit" th:value="#{review.helpful.button}" class="helpful_button" />
+					</form>
+				</div>
+			</div>
 		</div>
 	</div>
 

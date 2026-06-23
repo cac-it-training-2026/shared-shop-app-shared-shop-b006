@@ -113,15 +113,16 @@ p {
 }
 /* ---- ボタン(商品個数指定) ---- */
 [type=button] {
-	width: 80px;
-	height: 35px;
+	width: 30px;
+	height: 30px;
 	border-width: 1px;
 	border-style: solid;
 	border-color: #808080;
-	padding: 0px 10px;
-	margin: 15px 5px 15px 5px;
+	padding: 0;
+	margin: 5px;
 	border-radius: 6px;
 	font-weight: bold;
+	vertical-align: middle;
 }
 
 /* ---- 商品情報 ---- */
@@ -626,9 +627,19 @@ select {
 	padding-left: 20px;
 	text-align: left;
 }
+.list_table.basket form {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 .list_table.basket [type="button"],
 .list_table.basket .delete {
 	margin: 0 3px;
+}
+.list_table.basket input[type="number"] {
+	width: 40px;
+	height: 25px;
+	margin: 0 2px;
 }
 .list_table.basket .delete{
 	width: 80px;

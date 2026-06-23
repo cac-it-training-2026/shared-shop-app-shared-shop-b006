@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jp.co.sss.shop.bean.BasketBean;
@@ -16,6 +17,7 @@ import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
 import jp.co.sss.shop.form.ItemForm;
+import jp.co.sss.shop.util.Constant;
 
 /**
  * オブジェクト間でのフィールドコピー処理を行うクラス
@@ -24,6 +26,7 @@ import jp.co.sss.shop.form.ItemForm;
  */
 @Service
 public class BeanTools {
+
 	/**
 	 * ItemFormクラスの各フィールドの値をItemBeanクラスにコピー
 	 *
@@ -38,7 +41,6 @@ public class BeanTools {
 		BeanUtils.copyProperties(form, bean);
 
 		bean.setId(form.getId());
-		bean.setNameKana(form.getNameKana());
 
 		//		bean.setPrice(Integer.parseInt(form.getPrice()));
 
@@ -92,7 +94,6 @@ public class BeanTools {
 
 		bean.setCategoryId(entity.getCategory().getId());
 		bean.setCategoryName(entity.getCategory().getName());
-		bean.setNameKana(entity.getNameKana());
 
 		return bean;
 	}
@@ -129,7 +130,6 @@ public class BeanTools {
 
 		form.setCategoryId(entity.getCategory().getId());
 		form.setCategoryName(entity.getCategory().getName());
-		form.setNameKana(entity.getNameKana());
 		//	form.setPrice(entity.getPrice());
 		//	form.setStock(entity.getStock());
 
@@ -152,7 +152,6 @@ public class BeanTools {
 			if (entity.getCategory() != null) {
 				bean.setCategoryName(entity.getCategory().getName());
 			}
-			bean.setNameKana(entity.getNameKana());
 
 			beanList.add(bean);
 		}
@@ -209,6 +208,7 @@ public class BeanTools {
 		for (OrderItem orderItem : orderItemList) {
 			OrderItemBean orderItemBean = new OrderItemBean();
 
+			orderItemBean.setId(orderItem.getItem().getId());
 			orderItemBean.setName(orderItem.getItem().getName());
 			orderItemBean.setPrice(orderItem.getPrice());
 			orderItemBean.setOrderNum(orderItem.getQuantity());

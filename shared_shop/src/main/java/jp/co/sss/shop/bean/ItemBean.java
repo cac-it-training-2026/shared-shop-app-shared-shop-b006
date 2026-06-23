@@ -18,11 +18,6 @@ public class ItemBean {
 	private String name;
 
 	/**
-	 * 商品名（カナ）
-	 */
-	private String nameKana;
-
-	/**
 	 * 価格
 	 */
 	private Integer price;
@@ -51,6 +46,16 @@ public class ItemBean {
 	 * カテゴリ名
 	 */
 	private String categoryName;
+
+	/**
+	 * 平均評価
+	 */
+	private Double averageRating;
+
+	/**
+	 * レビュー数
+	 */
+	private Integer reviewCount;
 
 	/**
 	 * 商品ID取得
@@ -82,22 +87,6 @@ public class ItemBean {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * 商品名（カナ）の取得
-	 * @return 商品名（カナ）
-	 */
-	public String getNameKana() {
-		return nameKana;
-	}
-
-	/**
-	 * 商品名（カナ）のセット
-	 * @param nameKana 商品名（カナ）
-	 */
-	public void setNameKana(String nameKana) {
-		this.nameKana = nameKana;
 	}
 
 	/**
@@ -194,6 +183,38 @@ public class ItemBean {
 	 */
 	public void setCategoryName(String categoryName) {
 		this.categoryName = categoryName;
+	}
+
+	/**
+	 * 平均評価の取得
+	 * @return 平均評価
+	 */
+	public Double getAverageRating() {
+		return averageRating;
+	}
+
+	/**
+	 * 平均評価のセット
+	 * @param averageRating 平均評価
+	 */
+	public void setAverageRating(Double averageRating) {
+		this.averageRating = averageRating;
+	}
+
+	/**
+	 * レビュー数の取得
+	 * @return レビュー数
+	 */
+	public Integer getReviewCount() {
+		return reviewCount;
+	}
+
+	/**
+	 * レビュー数のセット
+	 * @param reviewCount レビュー数
+	 */
+	public void setReviewCount(Integer reviewCount) {
+		this.reviewCount = reviewCount;
 	}
 
 }
