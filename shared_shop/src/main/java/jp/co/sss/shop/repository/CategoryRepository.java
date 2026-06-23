@@ -53,4 +53,14 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 	Page<Category> findByDeleteFlagOrderByInsertDateDescIdDescPage(
 			@Param(value = "deleteFlag") int deleteFlag, Pageable pageable);
 
+	/**
+	 * 裏メニューを含まないカテゴリ情報を取得
+	 * @param deleteFlag 削除フラグ
+	 * @return カテゴリエンティティのリスト
+	 */
+	@Query("SELECT c FROM Category c WHERE c.deleteFlag = :deleteFlag " +
+			"AND c.id NOT IN (SELECT DISTINCT i.category.id FROM Item i WHERE i.isSecret = 1) " +
+			"ORDER BY c.insertDate DESC, c.id DESC")
+	List<Category> findByDeleteFlagExcludeSecret(@Param("deleteFlag") int deleteFlag);
+
 }

@@ -99,6 +99,9 @@ public class ClientOrderShowController {
 			// 合計金額のセット
 			orderBean.setTotal(total);
 
+			// 注文商品情報リストをセット
+			orderBean.setOrderItemBeanList(beanTools.generateOrderItemBeanList(orderItemList));
+
 			orderBeanList.add(orderBean);
 		}
 

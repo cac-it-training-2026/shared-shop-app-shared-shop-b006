@@ -212,6 +212,12 @@ public class BeanTools {
 			orderItemBean.setName(orderItem.getItem().getName());
 			orderItemBean.setPrice(orderItem.getPrice());
 			orderItemBean.setOrderNum(orderItem.getQuantity());
+			orderItemBean.setIsMystery(orderItem.getIsMystery());
+
+			if (orderItem.getIsMystery() != null && orderItem.getIsMystery() == 1) {
+				orderItemBean.setMysteryItemName(orderItem.getMysteryItem().getName());
+				orderItemBean.setMysteryItemRank(orderItem.getMysteryItem().getRank());
+			}
 
 			//購入時単価の合計値を計算
 			//※OrderItemのItemフィールドからgetPriceを利用すると、購入時ではなく現在の単価になってしまう。

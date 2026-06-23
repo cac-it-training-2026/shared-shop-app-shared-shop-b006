@@ -15,11 +15,20 @@
 	<table class="list_table order" th:if="!${#lists.isEmpty(orders)}">
 		<tr>
 			<th>[[#{data.client.order.date}]]</th>
+			<th>[[#{data.item.name}]]</th>
 			<th>[[#{paymethod.str}]]</th>
 			<th>[[#{data.total.price}]]</th>
 		</tr>
 		<tr th:each="order: ${orders}">
 			<td><a th:href="@{/client/order/detail/{id}(id=${order.id})}" th:text="${order.insertDate}"></a></td>
+			<td>
+				<ul class="order_item_list_in_table">
+					<li th:each="orderItem: ${order.orderItemBeanList}">
+						<span th:if="${orderItem.isMystery == 1}">???ボックス</span>
+						<span th:unless="${orderItem.isMystery == 1}" th:text="${orderItem.name}"></span>
+					</li>
+				</ul>
+			</td>
 			<td th:switch="${order.payMethod}">
 				<span th:case="1">[[#{paymethod.credit.str}]]</span>
 				<span th:case="2">[[#{paymethod.bank.str}]]</span>

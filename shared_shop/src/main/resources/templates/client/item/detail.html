@@ -31,6 +31,9 @@
 				<dt>[[#{data.description}]]</dt>
 				<dd th:text="*{description}"></dd>
 			</dl>
+			<p th:if="*{isSecret == 1}" class="mystery_box_msg" style="color: #d9534f; font-weight: bold; margin-top: 10px;">
+				この商品は中身がランダムで決まります。何が届くかはお楽しみに！
+			</p>
 		</div>
 		<div class="detail_button_area">
 			<form th:action="@{/client/basket/add}" method="post" class="user_info_form" th:if="*{stock > 0}">

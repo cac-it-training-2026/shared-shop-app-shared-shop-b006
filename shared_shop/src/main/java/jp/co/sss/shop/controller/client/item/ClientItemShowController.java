@@ -274,8 +274,12 @@ public class ClientItemShowController {
 
 		List<Item> itemList;
 		if (itemName != null && !itemName.isBlank()) {
-			itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(itemName,
-					Constant.NOT_DELETED);
+			if ("yaminabe".equals(itemName)) {
+				itemList = itemRepository.findByIsSecretAndDeleteFlag(1, Constant.NOT_DELETED);
+			} else {
+				itemList = itemRepository.findByNameContainingAndDeleteFlagOrderByInsertDateDesc(itemName,
+						Constant.NOT_DELETED);
+			}
 		} else {
 			// キーワード空の場合は全件（新着順）
 			itemList = itemRepository.findByDeleteFlagOrderByInsertDateDesc(Constant.NOT_DELETED);
@@ -337,6 +341,6 @@ class CommonControllerAdvice {
 	 */
 	@org.springframework.web.bind.annotation.ModelAttribute("categories")
 	public List<Category> getCategories() {
-		return categoryRepository.findByDeleteFlagOrderByInsertDateDescIdDesc(jp.co.sss.shop.util.Constant.NOT_DELETED);
+		return categoryRepository.findByDeleteFlagExcludeSecret(jp.co.sss.shop.util.Constant.NOT_DELETED);
 	}
 }

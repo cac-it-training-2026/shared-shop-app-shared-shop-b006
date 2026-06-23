@@ -67,6 +67,12 @@ public class Item {
 	private Integer deleteFlag;
 
 	/**
+	 * 裏メニューフラグ 0:通常、1:裏メニュー
+	 */
+	@Column
+	private Integer isSecret;
+
+	/**
 	 * 登録日付
 	 */
 	@Column(insertable = false, updatable = false)
@@ -237,6 +243,22 @@ public class Item {
 	 */
 	public void setDeleteFlag(Integer deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+
+	/**
+	 * 裏メニューフラグの取得
+	 * @return 裏メニューフラグ
+	 */
+	public Integer getIsSecret() {
+		return isSecret;
+	}
+
+	/**
+	 * 裏メニューフラグのセット
+	 * @param isSecret 裏メニューフラグ
+	 */
+	public void setIsSecret(Integer isSecret) {
+		this.isSecret = isSecret;
 	}
 
 	/**

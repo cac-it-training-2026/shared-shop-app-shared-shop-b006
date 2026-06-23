@@ -30,6 +30,14 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 			@Param(value = "deleteFlag") int deleteFlag, Pageable pageable);
 
 	/**
+	 * 裏メニューフラグと削除フラグを条件に検索
+	 * @param isSecret 裏メニューフラグ
+	 * @param deleteFlag 削除フラグ
+	 * @return 商品エンティティのリスト
+	 */
+	List<Item> findByIsSecretAndDeleteFlag(int isSecret, int deleteFlag);
+
+	/**
 	 * 商品IDと削除フラグを条件に検索（管理者,商品詳細機能で利用）
 	 * @param id 商品ID
 	 * @param deleteFlag 削除フラグ
@@ -52,7 +60,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティのリスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
+	@Query("SELECT i FROM Item i WHERE i.deleteFlag = :deleteFlag AND i.isSecret = 0 ORDER BY i.insertDate DESC, i.id DESC")
 	List<Item> findByDeleteFlagOrderByInsertDateDesc(@Param("deleteFlag") int deleteFlag);
 
 	/**
@@ -61,7 +69,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティ的リスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.category.id = :categoryId AND i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
+	@Query("SELECT i FROM Item i WHERE i.category.id = :categoryId AND i.deleteFlag = :deleteFlag AND i.isSecret = 0 ORDER BY i.insertDate DESC, i.id DESC")
 	List<Item> findByCategoryIdAndDeleteFlagOrderByInsertDateDesc(@Param("categoryId") int categoryId,
 			@Param("deleteFlag") int deleteFlag);
 
@@ -71,18 +79,18 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティのリスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.deleteFlag = :deleteFlag " +
+	@Query("SELECT i FROM Item i WHERE i.deleteFlag = :deleteFlag AND i.isSecret = 0 " +
 			"ORDER BY (SELECT COUNT(oi.id) FROM OrderItem oi WHERE oi.item.id = i.id) DESC, i.id DESC")
 	List<Item> findByDeleteFlagOrderBySalesDesc(@Param("deleteFlag") int deleteFlag);
 
 	/**
-	 * 特定のカテゴリ内で未削除の商品を注文回数が多い顺に取得（売れ筋順・カテゴリ絞り込み）
+	 * 特定のカテゴリ内で未削除の商品を注文回数が多い順に取得（売れ筋順・カテゴリ絞り込み）
 	 * ※OracleデータベースのGROUP BY制約を回避するため、ORDER BY内に相関サブクエリとCOUNT関数を記述
 	 * @param categoryId カテゴリID
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティのリスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.category.id = :categoryId AND i.deleteFlag = :deleteFlag " +
+	@Query("SELECT i FROM Item i WHERE i.category.id = :categoryId AND i.deleteFlag = :deleteFlag AND i.isSecret = 0 " +
 			"ORDER BY (SELECT COUNT(oi.id) FROM OrderItem oi WHERE oi.item.id = i.id) DESC, i.id DESC")
 	List<Item> findByCategoryIdAndDeleteFlagOrderBySalesDesc(@Param("categoryId") int categoryId,
 			@Param("deleteFlag") int deleteFlag);
@@ -93,7 +101,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 	 * @param deleteFlag 削除フラグ
 	 * @return 商品エンティティのリスト
 	 */
-	@Query("SELECT i FROM Item i WHERE i.name LIKE %:name% AND i.deleteFlag = :deleteFlag ORDER BY i.insertDate DESC, i.id DESC")
+	@Query("SELECT i FROM Item i WHERE i.name LIKE %:name% AND i.deleteFlag = :deleteFlag AND i.isSecret = 0 ORDER BY i.insertDate DESC, i.id DESC")
 	List<Item> findByNameContainingAndDeleteFlagOrderByInsertDateDesc(@Param("name") String name,
 			@Param("deleteFlag") int deleteFlag);
 }

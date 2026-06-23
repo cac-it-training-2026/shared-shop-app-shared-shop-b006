@@ -126,4 +126,67 @@ public class OrderItemBean {
 	public void setOrderNum(Integer orderNum) {
 		this.orderNum = orderNum;
 	}
+
+	/**
+	 * ミステリーボックス由来フラグ
+	 */
+	private Integer isMystery;
+
+	/**
+	 * 景品名
+	 */
+	private String mysteryItemName;
+
+	/**
+	 * ランク
+	 */
+	private String mysteryItemRank;
+
+	/**
+	 * ミステリーボックス由来フラグの取得
+	 * @return ミステリーボックス由来フラグ
+	 */
+	public Integer getIsMystery() {
+		return isMystery;
+	}
+
+	/**
+	 * ミステリーボックス由来フラグのセット
+	 * @param isMystery ミステリーボックス由来フラグ
+	 */
+	public void setIsMystery(Integer isMystery) {
+		this.isMystery = isMystery;
+	}
+
+	/**
+	 * 景品名の取得
+	 * @return 景品名
+	 */
+	public String getMysteryItemName() {
+		return mysteryItemName;
+	}
+
+	/**
+	 * 景品名のセット
+	 * @param mysteryItemName 景品名
+	 */
+	public void setMysteryItemName(String mysteryItemName) {
+		this.mysteryItemName = mysteryItemName;
+	}
+
+	/**
+	 * ランクの取得
+	 * @return ランク
+	 */
+	public String getMysteryItemRank() {
+		return mysteryItemRank;
+	}
+
+	/**
+	 * ランクのセット
+	 * @param mysteryItemRank ランク
+	 */
+	public void setMysteryItemRank(String mysteryItemRank) {
+		this.mysteryItemRank = mysteryItemRank;
+	}
 }
