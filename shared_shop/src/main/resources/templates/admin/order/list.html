@@ -19,6 +19,7 @@
 			<tr>
 				<th>[[#{data.id}]]</th>
 				<th>[[#{user}+#{userForm.name}]]</th>
+				<th>[[#{data.item.name}]]</th>
 				<th>[[#{data.order.date}]]</th>
 				<th>[[#{data.paymethod}]]</th>
 				<th>[[#{data.total.price}]]</th>
@@ -28,6 +29,14 @@
 				<td th:text="${order.id}"></td>
 				<td>
 					<a th:href="@{/admin/order/detail/{id}(id=${order.id})}" th:text="${order.userName}"></a>
+				</td>
+				<td>
+					<ul class="order_item_list_in_table">
+						<li th:each="orderItem: ${order.orderItemBeanList}" th:if="${order.orderItemBeanList != null}">
+							<span th:if="${orderItem.isMystery == 1}">???ボックス</span>
+							<span th:unless="${orderItem.isMystery == 1}" th:text="${orderItem.name}"></span>
+						</li>
+					</ul>
 				</td>
 				<td th:text="${order.insertDate}"></td>
 				<td th:switch="${order.payMethod}">

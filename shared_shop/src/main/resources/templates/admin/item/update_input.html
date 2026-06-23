@@ -41,6 +41,11 @@
 					</select>
 				</li>
 				<li>
+					<label><span class="input_title">裏メニューフラグ</span></label>
+					<input type="radio" name="isSecret" value="0" th:checked="*{isSecret == null or isSecret == 0}" /> 通常商品
+					<input type="radio" name="isSecret" value="1" th:checked="*{isSecret == 1}" /> 裏メニュー
+				</li>
+				<li>
 					<label>
 						<span class="input_title">[[#{itemForm.description}]]</span>
 						<textarea rows="6" th:field="*{description}"></textarea>

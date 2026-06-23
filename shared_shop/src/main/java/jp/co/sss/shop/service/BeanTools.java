@@ -95,6 +95,8 @@ public class BeanTools {
 		bean.setCategoryId(entity.getCategory().getId());
 		bean.setCategoryName(entity.getCategory().getName());
 
+		bean.setIsSecret(entity.getIsSecret());
+
 		return bean;
 	}
 
@@ -132,6 +134,7 @@ public class BeanTools {
 		form.setCategoryName(entity.getCategory().getName());
 		//	form.setPrice(entity.getPrice());
 		//	form.setStock(entity.getStock());
+		form.setIsSecret(entity.getIsSecret());
 
 		return form;
 	}
