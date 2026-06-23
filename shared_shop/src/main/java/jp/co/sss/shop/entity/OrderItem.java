@@ -133,4 +133,49 @@ public class OrderItem {
 		this.price = price;
 	}
 
+	/**
+	 * ミステリーボックス由来フラグ
+	 */
+	@Column
+	private Integer isMystery;
+
+	/**
+	 * 景品情報
+	 */
+	@ManyToOne
+	@JoinColumn(name = "mystery_item_id", referencedColumnName = "id")
+	private MysteryItem mysteryItem;
+
+	/**
+	 * ミステリーボックス由来フラグの取得
+	 * @return ミステリーボックス由来フラグ
+	 */
+	public Integer getIsMystery() {
+		return isMystery;
+	}
+
+	/**
+	 * ミステリーボックス由来フラグのセット
+	 * @param isMystery ミステリーボックス由来フラグ
+	 */
+	public void setIsMystery(Integer isMystery) {
+		this.isMystery = isMystery;
+	}
+
+	/**
+	 * 景品情報の取得
+	 * @return 景品情報
+	 */
+	public MysteryItem getMysteryItem() {
+		return mysteryItem;
+	}
+
+	/**
+	 * 景品情報のセット
+	 * @param mysteryItem 景品情報
+	 */
+	public void setMysteryItem(MysteryItem mysteryItem) {
+		this.mysteryItem = mysteryItem;
+	}
+
 }

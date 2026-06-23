@@ -58,6 +58,11 @@ public class ItemBean {
 	private Integer reviewCount;
 
 	/**
+	 * 裏商品フラグ
+	 */
+	private Integer isSecret;
+
+	/**
 	 * 商品ID取得
 	 * @return 商品ID
 	 */
@@ -215,6 +220,22 @@ public class ItemBean {
 	 */
 	public void setReviewCount(Integer reviewCount) {
 		this.reviewCount = reviewCount;
+	}
+
+	/**
+	 * 裏商品フラグの取得
+	 * @return 裏商品フラグ
+	 */
+	public Integer getIsSecret() {
+		return isSecret;
+	}
+
+	/**
+	 * 裏商品フラグのセット
+	 * @param isSecret 裏商品フラグ
+	 */
+	public void setIsSecret(Integer isSecret) {
+		this.isSecret = isSecret;
 	}
 
 }

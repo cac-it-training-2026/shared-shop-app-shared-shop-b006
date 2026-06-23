@@ -1,5 +1,7 @@
 package jp.co.sss.shop.bean;
 
+import java.util.List;
+
 /**
  * 注文情報クラス
  *
@@ -51,6 +53,11 @@ public class OrderBean {
 	 * 注文会員名
 	 */
 	private String userName;
+
+	/**
+	 * 注文商品情報のリスト
+	 */
+	private List<OrderItemBean> orderItemBeanList;
 
 	/**
 	 * 注文IDの取得
@@ -194,6 +201,22 @@ public class OrderBean {
 	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	/**
+	 * 注文商品情報リストの取得
+	 * @return 注文商品情報リスト
+	 */
+	public List<OrderItemBean> getOrderItemBeanList() {
+		return orderItemBeanList;
+	}
+
+	/**
+	 * 注文商品情報リストのセット
+	 * @param orderItemBeanList 注文商品情報リスト
+	 */
+	public void setOrderItemBeanList(List<OrderItemBean> orderItemBeanList) {
+		this.orderItemBeanList = orderItemBeanList;
 	}
 
 }

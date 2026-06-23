@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +25,17 @@ import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Order;
 import jp.co.sss.shop.entity.OrderItem;
+import jp.co.sss.shop.entity.MysteryItem;
+import jp.co.sss.shop.entity.MysteryItemWeight;
 import jp.co.sss.shop.entity.User;
 import jp.co.sss.shop.form.OrderForm;
 import jp.co.sss.shop.repository.ItemRepository;
+import jp.co.sss.shop.repository.MysteryItemRepository;
+import jp.co.sss.shop.repository.MysteryItemWeightRepository;
 import jp.co.sss.shop.repository.OrderItemRepository;
 import jp.co.sss.shop.repository.OrderRepository;
 import jp.co.sss.shop.repository.UserRepository;
+import jp.co.sss.shop.util.Constant;
 
 /**
 * 注文機能を実装するコントローラー
@@ -52,6 +59,12 @@ public class ClientOrderRegistController {
 
 	@Autowired
 	OrderItemRepository orderItemRepository;
+
+	@Autowired
+	MysteryItemRepository mysteryItemRepository;
+
+	@Autowired
+	MysteryItemWeightRepository mysteryItemWeightRepository;
 
 	//	届け先住所の登録と入力フォームに表示する初期値の設定を行う
 	/**
@@ -296,17 +309,25 @@ public class ClientOrderRegistController {
 
 		//		注文詳細tableへの登録と商品の在庫の更新
 		for (BasketBean basketBean : basketList) {
-			OrderItem orderItem = new OrderItem();
 			Item item = itemRepository.getReferenceById(basketBean.getId());
 
-			orderItem.setOrder(order);
-			orderItem.setItem(item);
-			orderItem.setQuantity(basketBean.getOrderNum());
-			orderItem.setPrice(item.getPrice());
-			orderItemRepository.save(orderItem);
+			if (item.getIsSecret() != null && item.getIsSecret() == 1) {
+				// ミステリーボックスの場合
+				List<OrderItem> mysteryOrderItems = generateMysteryOrderItems(order, item, basketBean.getOrderNum());
+				orderItemRepository.saveAll(mysteryOrderItems);
+				// ミステリーボックスは在庫管理を行わない
+			} else {
+				// 通常商品の場合
+				OrderItem orderItem = new OrderItem();
+				orderItem.setOrder(order);
+				orderItem.setItem(item);
+				orderItem.setQuantity(basketBean.getOrderNum());
+				orderItem.setPrice(item.getPrice());
+				orderItemRepository.save(orderItem);
 
-			item.setStock(item.getStock() - basketBean.getOrderNum());
-			itemRepository.save(item);
+				item.setStock(item.getStock() - basketBean.getOrderNum());
+				itemRepository.save(item);
+			}
 		}
 
 		session.removeAttribute("basketBeans");
@@ -326,5 +347,52 @@ public class ClientOrderRegistController {
 			return "redirect:/login";
 		}
 		return "client/order/complete";
+	}
+
+	/**
+	 * 当選ランクの抽選
+	 * @param grade グレード（商品価格）
+	 * @return 当選ランク("S", "A", "B", "C")
+	 */
+	private String drawRank(final int grade) {
+		List<MysteryItemWeight> weights = mysteryItemWeightRepository.findByGrade(grade);
+		int totalWeight = weights.stream().mapToInt(MysteryItemWeight::getWeight).sum();
+		int randomNum = ThreadLocalRandom.current().nextInt(totalWeight);
+
+		int currentWeight = 0;
+		for (MysteryItemWeight weight : weights) {
+			currentWeight += weight.getWeight();
+			if (randomNum < currentWeight) {
+				return weight.getRank();
+			}
+		}
+		return "C"; // フォールバック
+	}
+
+	/**
+	 * ミステリーボックス注文明細の生成
+	 * @param order 注文情報
+	 * @param mysteryBoxItem ミステリーボックス商品
+	 * @param quantity 注文個数
+	 * @return 注文商品エンティティのリスト
+	 */
+	private List<OrderItem> generateMysteryOrderItems(final Order order, final Item mysteryBoxItem,
+			final int quantity) {
+		List<OrderItem> orderItems = new ArrayList<>();
+		IntStream.range(0, quantity).forEach(i -> {
+			String rank = drawRank(mysteryBoxItem.getPrice());
+			List<MysteryItem> candidates = mysteryItemRepository.findByRankAndDeleteFlag(rank, Constant.NOT_DELETED);
+			MysteryItem selected = candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
+
+			OrderItem orderItem = new OrderItem();
+			orderItem.setOrder(order);
+			orderItem.setItem(mysteryBoxItem);
+			orderItem.setQuantity(1); // 1つずつ明細を作成し、それぞれに景品を紐づける
+			orderItem.setIsMystery(1);
+			orderItem.setMysteryItem(selected);
+			orderItem.setPrice(mysteryBoxItem.getPrice());
+			orderItems.add(orderItem);
+		});
+		return orderItems;
 	}
 }
