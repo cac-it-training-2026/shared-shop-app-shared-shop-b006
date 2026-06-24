@@ -76,23 +76,33 @@
 
 	<div class="roulette-container">
 		<h2 class="title">1日1回限定！ログインルーレット</h2>
-		<p>ログインありがとうございます！クーポンが当たるルーレットに挑戦しましょう。</p>
 
-		<div class="wheel-wrapper">
-			<div class="pointer"></div>
-			<div class="roulette-wheel" id="wheel">
-				<div class="wheel-label label-1">1等<br/>(50%引)</div>
-				<div class="wheel-label label-2">2等<br/>(30%引)</div>
-				<div class="wheel-label label-3">3等<br/>(20%引)</div>
-				<div class="wheel-label label-4">4等<br/>(10%引)</div>
-				<div class="wheel-label label-5">5等<br/>(5%引)</div>
+		<div th:if="${hasSpun}">
+			<p>本日のルーレットは既に実施済みです。また明日挑戦してください！</p>
+			<div class="button-area">
+				<a th:href="@{/}" class="button">トップへ戻る</a>
 			</div>
 		</div>
 
-		<div class="button-area">
-			<form th:action="@{/client/roulette/run}" method="post" id="rouletteForm">
-				<input type="button" value="ルーレットを回す！" class="button" id="spinButton" onclick="spinWheel()" />
-			</form>
+		<div th:unless="${hasSpun}">
+			<p>ログインありがとうございます！クーポンが当たるルーレットに挑戦しましょう。</p>
+
+			<div class="wheel-wrapper">
+				<div class="pointer"></div>
+				<div class="roulette-wheel" id="wheel">
+					<div class="wheel-label label-1">1等<br/>(50%引)</div>
+					<div class="wheel-label label-2">2等<br/>(30%引)</div>
+					<div class="wheel-label label-3">3等<br/>(20%引)</div>
+					<div class="wheel-label label-4">4等<br/>(10%引)</div>
+					<div class="wheel-label label-5">5等<br/>(5%引)</div>
+				</div>
+			</div>
+
+			<div class="button-area">
+				<form th:action="@{/client/roulette/run}" method="post" id="rouletteForm">
+					<input type="button" value="ルーレットを回す！" class="button" id="spinButton" onclick="spinWheel()" />
+				</form>
+			</div>
 		</div>
 	</div>
 
@@ -129,17 +139,17 @@
 
 				const winningNumber = result.winningNumber;
 
-				// サーバーの当選番号（0-99、確率は不均等）を、ビジュアル上の等分セグメントにマップする
-				// 1等: num < 1   (1%)  -> segment 0
-				// 2等: num < 5   (4%)  -> segment 1
-				// 3等: num < 20  (15%) -> segment 2
-				// 4等: num < 50  (30%) -> segment 3
-				// 5等: その他     (50%) -> segment 4
+				// サーバーの当選番号（0-99、各20%の均等確率）を、ビジュアル上の等分セグメントにマップする
+				// 1等: num < 20 (20%) -> segment 0
+				// 2等: num < 40 (20%) -> segment 1
+				// 3等: num < 60 (20%) -> segment 2
+				// 4等: num < 80 (20%) -> segment 3
+				// 5等: その他   (20%) -> segment 4
 				let segmentIndex;
-				if (winningNumber < 1) segmentIndex = 0;
-				else if (winningNumber < 5) segmentIndex = 1;
-				else if (winningNumber < 20) segmentIndex = 2;
-				else if (winningNumber < 50) segmentIndex = 3;
+				if (winningNumber < 20) segmentIndex = 0;
+				else if (winningNumber < 40) segmentIndex = 1;
+				else if (winningNumber < 60) segmentIndex = 2;
+				else if (winningNumber < 80) segmentIndex = 3;
 				else segmentIndex = 4;
 
 				// 当選したセグメントの中心を狙う

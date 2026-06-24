@@ -36,11 +36,11 @@ public class RouletteService {
 	/**
 	 * 当選する割引率をランダムに決定する
 	 *
-	 * 1等: 50% (1%)
-	 * 2等: 30% (4%)
-	 * 3等: 20% (15%)
-	 * 4等: 10% (30%)
-	 * 5等: 5% (50%)
+	 * 1等: 50% (20%)
+	 * 2等: 30% (20%)
+	 * 3等: 20% (20%)
+	 * 4等: 10% (20%)
+	 * 5等: 5% (20%)
 	 *
 	 * @return 当選した割引率(%)
 	 */
@@ -58,13 +58,13 @@ public class RouletteService {
 		int num = rand.nextInt(100); // 0-99
 		int discountRate;
 
-		if (num < 1) {
+		if (num < 20) {
 			discountRate = 50; // 1等
-		} else if (num < 5) {
+		} else if (num < 40) {
 			discountRate = 30; // 2等
-		} else if (num < 20) {
+		} else if (num < 60) {
 			discountRate = 20; // 3等
-		} else if (num < 50) {
+		} else if (num < 80) {
 			discountRate = 10; // 4等
 		} else {
 			discountRate = 5; // 5等

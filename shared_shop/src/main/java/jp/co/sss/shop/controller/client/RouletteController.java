@@ -41,14 +41,22 @@ public class RouletteController {
 
 	/**
 	 * ルーレット画面表示
+	 * @param model
 	 * @return "client/roulette/roulette"
 	 */
 	@RequestMapping(path = "/client/roulette", method = RequestMethod.GET)
-	public String showRoulette() {
+	public String showRoulette(Model model) {
 		UserBean loginUser = (UserBean) session.getAttribute("user");
 		if (loginUser == null) {
 			return "redirect:/login";
 		}
+
+		User user = userRepository.getReferenceById(loginUser.getId());
+		Date today = Date.valueOf(LocalDate.now());
+
+		boolean hasSpun = user.getLastRouletteDate() != null && user.getLastRouletteDate().equals(today);
+		model.addAttribute("hasSpun", hasSpun);
+
 		return "client/roulette/roulette";
 	}
 
