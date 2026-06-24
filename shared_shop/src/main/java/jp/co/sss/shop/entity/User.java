@@ -86,13 +86,17 @@ public class User {
 	 * 連続ログイン失敗回数
 	 */
 	@Column(insertable = false)
-	private Integer loginFailCount;
-
-	/**
+	private Integer loginFailCount;	/**
 	 * ロック解除予定時刻
 	 */
 	@Column
 	private LocalDateTime lockTime;
+
+	/**
+	 * 最後にルーレットを実行した日付
+	 */
+	@Column(name = "last_roulette_date")
+	private java.sql.Date lastRouletteDate;
 
 	/**
 	 * 会員IDの取得
@@ -284,5 +288,21 @@ public class User {
 	 */
 	public void setLockTime(LocalDateTime lockTime) {
 		this.lockTime = lockTime;
+	}
+
+	/**
+	 * 最後にルーレットを実行した日付の取得
+	 * @return 最後にルーレットを実行した日付
+	 */
+	public java.sql.Date getLastRouletteDate() {
+		return lastRouletteDate;
+	}
+
+	/**
+	 * 最後にルーレットを実行した日付のセット
+	 * @param lastRouletteDate 最後にルーレットを実行した日付
+	 */
+	public void setLastRouletteDate(java.sql.Date lastRouletteDate) {
+		this.lastRouletteDate = lastRouletteDate;
 	}
 }

@@ -62,9 +62,14 @@ public class Order {
 
 	/**
 	 * 注文日付
+	 */	@Column(insertable = false)
+	private java.sql.Date insertDate;
+
+	/**
+	 * 割引率
 	 */
-	@Column(insertable = false)
-	private Date insertDate;
+	@Column(name = "discount_rate")
+	private Integer discountRate;
 
 	/**
 	 * 会員情報
@@ -223,4 +228,20 @@ public class Order {
 		this.orderItemsList = orderItemsList;
 	}
 
+
+	/**
+	 * 割引率の取得
+	 * @return 割引率
+	 */
+	public Integer getDiscountRate() {
+		return discountRate;
+	}
+
+	/**
+	 * 割引率のセット
+	 * @param discountRate 割引率
+	 */
+	public void setDiscountRate(Integer discountRate) {
+		this.discountRate = discountRate;
+	}
 }

@@ -36,15 +36,27 @@
 			<th>[[#{data.order.num}]]</th>
 			<th>[[#{data.subtotal}]]</th>
 		</tr>
+				<tr th:each="orderItem: ${orderItemBeans}">
+			<td class="image">
+				<img th:src="@{/images/{image}(image=${orderItem.image})}" th:if="${orderItem.image != null}" />
+				<img th:src="@{/images/common/no_image.jpg}" th:if="${orderItem.image == null}" />
 		<tr th:each="orderItem: ${orderItemBeans}">
 			<td th:text="${orderItem.name}"></td>
-			<td>
+			<td class="image">
 				<img th:src="@{/images/{image}(image=${orderItem.image})}" th:if="${orderItem.image != null}" />
 				<img th:src="@{/images/common/no_image.jpg}" th:if="${orderItem.image == null}" />
 			</td>
 			<td th:text="${orderItem.price}"></td>
 			<td th:text="${orderItem.orderNum}"></td>
 			<td th:text="${orderItem.subtotal}"></td>
+		</tr>
+		<tr>
+			<td colspan="3"></td>
+			<td class="total">小計</td>
+			<td class="total" th:text="${subtotalSum}"></td>
+		</tr>
+			<td class="total" style="color: #ff6b6b;">割引 ([[${discountRate}]]% OFF)</td>
+			<td class="total" style="color: #ff6b6b;" th:text="'-' + (${subtotalSum} - ${total})"></td>
 		</tr>
 		<tr>
 			<td colspan="3"></td>

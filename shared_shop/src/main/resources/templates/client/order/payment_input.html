@@ -57,7 +57,22 @@
 				</li>
 			</ul>
 
-			<input type="submit" class="send_button" value="次へ" />
+			<h3 th:class="title">クーポンの利用</h3>
+			<ul class="payment_method_select">
+				<li>
+					<label class="radio_label">
+						<input type="radio" name="couponId" value="0" checked="checked" /> 利用しない
+					</label>
+				</li>
+				<li th:each="coupon : ${coupons}">
+					<label class="radio_label">
+						<input type="radio" name="couponId" th:value="${coupon.id}" />
+						[[${coupon.discountRate}]]% OFFクーポン (有効期限: [[${coupon.expiryDate}]])
+					</label>
+				</li>
+			</ul>
+
+			<input type="submit"  class="send_button" value="次へ" />
 
 		</form>
 		<form th:action="@{/client/order/payment/back}" method="post" class="update">

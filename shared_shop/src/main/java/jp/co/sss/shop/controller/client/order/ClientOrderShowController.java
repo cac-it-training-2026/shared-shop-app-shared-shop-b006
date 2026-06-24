@@ -93,8 +93,8 @@ public class ClientOrderShowController {
 			OrderBean orderBean = beanTools.copyEntityToOrderBean(order);
 			// orderレコードから紐づくOrderItemのListを取り出す
 			List<OrderItem> orderItemList = order.getOrderItemsList();
-			// PriceCalcクラスのorderItemPriceTotalメソッドを使用して合計金額を算出
-			int total = priceCalc.orderItemPriceTotal(orderItemList);
+			// PriceCalcクラスのcalculateOrderTotalメソッドを使用して合計金額を算出
+			int total = priceCalc.calculateOrderTotal(order);
 
 			// 合計金額のセット
 			orderBean.setTotal(total);
@@ -134,9 +134,10 @@ public class ClientOrderShowController {
 
 		// 変更点：リポジトリのメソッドを使い、「注文ID」「ユーザーID」「支払方法が存在する（確定済）」の3条件で取得
 		Optional<Order> orderOpt = orderRepository.findById(id);
-		if (orderOpt.isEmpty()) {
-			session.invalidate();
-			return "redirect:/login";
+
+		// 変更点：データが存在しない（他人のデータ、カート状態、または存在しないID）場合は安全にシステムエラーへ飛ばす
+		if (orderOpt.isEmpty() || !orderOpt.get().getUser().getId().equals(loginUser.getId()) || orderOpt.get().getPayMethod() == null) {
+			return "redirect:/syserror";
 		}
 
 		// Optionalからエンティティを取り出す
@@ -150,12 +151,17 @@ public class ClientOrderShowController {
 
 		// レビュー投稿済みフラグを判定
 		List<Boolean> reviewedList = order.getOrderItemsList().stream()
-				.map(oi -> (Boolean) reviewRepository.existsByOrderIdAndItemIdAndDeleteFlag(order.getId(),
-						oi.getItem().getId(), jp.co.sss.shop.util.Constant.NOT_DELETED))
+				.map(oi -> (Boolean) reviewRepository.existsByOrderIdAndItemIdAndDeleteFlag(order.getId(), oi.getItem().getId(), jp.co.sss.shop.util.Constant.NOT_DELETED))
 				.toList();
 
 		// 合計金額を算出
-		int total = priceCalc.orderItemBeanPriceTotalUseSubtotal(orderItemBeanList);
+		int total = priceCalc.calculateOrderTotal(order);
+
+		// 割引情報をViewへ渡す
+		int subtotalSum = priceCalc.orderItemPriceTotal(order.getOrderItemsList());
+		int discountRate = (order.getDiscountRate() != null) ? order.getDiscountRate() : 0;
+		model.addAttribute("subtotalSum", subtotalSum);
+		model.addAttribute("discountRate", discountRate);
 
 		// 注文情報をViewへ渡す
 		model.addAttribute("order", orderBean);
