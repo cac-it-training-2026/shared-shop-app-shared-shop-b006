@@ -57,7 +57,28 @@
 				</li>
 			</ul>
 
-			<input type="submit" class="send_button" value="次へ" />
+			<br />
+
+			<h3 th:class="title">クーポンの利用</h3>
+			<p th:if="${#lists.isEmpty(coupons)}">現在利用可能なクーポンはありません。</p>
+			<ul th:unless="${#lists.isEmpty(coupons)}" style="list-style: none; padding-left: 0;">
+				<li th:each="coupon : ${coupons}" style="margin-bottom: 10px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+					<label>
+						<input type="radio" name="couponId" th:value="${coupon.id}" th:field="*{couponId}" />
+						<span style="font-weight: bold; color: #ff6b6b;" th:text="|${coupon.discountRate}% OFF クーポン|"></span>
+						<br/>
+						<span style="font-size: 0.8em; color: #666;" th:text="|有効期限: ${coupon.expiryDate}|"></span>
+					</label>
+				</li>
+				<li style="margin-top: 10px;">
+					<label>
+						<input type="radio" name="couponId" value="0" th:field="*{couponId}" checked="checked" />
+						クーポンを利用しない
+					</label>
+				</li>
+			</ul>
+
+			<input type="submit"  class="send_button" value="次へ" />
 
 		</form>
 		<form th:action="@{/client/order/payment/back}" method="post" class="update">

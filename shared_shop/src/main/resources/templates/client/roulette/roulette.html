@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
+<head>
+<title>ログインルーレット | シェアードショップ</title>
+<meta charset="UTF-8" />
+</head>
+<body class="user">
+	<style>
+	.roulette-container {
+		text-align: center;
+		padding: 50px;
+	}
+	.wheel-wrapper {
+		position: relative;
+		width: 320px;
+		height: 320px;
+		margin: 20px auto;
+	}
+	.roulette-wheel {
+		position: relative;
+		width: 300px;
+		height: 300px;
+		border: 10px solid #333;
+		border-radius: 50%;
+		background: conic-gradient(
+			#ff6b6b 0deg 72deg,
+			#feca57 72deg 144deg,
+			#48dbfb 144deg 216deg,
+			#1dd1a1 216deg 288deg,
+			#ccc 288deg 360deg
+		);
+		transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+		overflow: hidden;
+	}
+	.wheel-label {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+		text-align: center;
+		font-weight: bold;
+		color: #333;
+		padding-top: 30px;
+		pointer-events: none;
+		font-size: 1.1rem;
+		line-height: 1.2;
+	}
+	.label-1 { transform: rotate(36deg); }
+	.label-2 { transform: rotate(108deg); }
+	.label-3 { transform: rotate(180deg); }
+	.label-4 { transform: rotate(252deg); }
+	.label-5 { transform: rotate(324deg); }
+
+	.pointer {
+		position: absolute;
+		top: -20px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 0;
+		height: 0;
+		border-left: 15px solid transparent;
+		border-right: 15px solid transparent;
+		border-top: 30px solid #333;
+		z-index: 10;
+	}
+	.button-area {
+		margin-top: 30px;
+	}
+	.button:disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
+	}
+	</style>
+
+	<div class="roulette-container">
+		<h2 class="title">1日1回限定！ログインルーレット</h2>
+		<p>ログインありがとうございます！クーポンが当たるルーレットに挑戦しましょう。</p>
+
+		<div class="wheel-wrapper">
+			<div class="pointer"></div>
+			<div class="roulette-wheel" id="wheel">
+				<div class="wheel-label label-1">1等<br/>(50%引)</div>
+				<div class="wheel-label label-2">2等<br/>(30%引)</div>
+				<div class="wheel-label label-3">3等<br/>(20%引)</div>
+				<div class="wheel-label label-4">4等<br/>(10%引)</div>
+				<div class="wheel-label label-5">5等<br/>(5%引)</div>
+			</div>
+		</div>
+
+		<div class="button-area">
+			<form th:action="@{/client/roulette/run}" method="post" id="rouletteForm">
+				<input type="button" value="ルーレットを回す！" class="button" id="spinButton" onclick="spinWheel()" />
+			</form>
+		</div>
+	</div>
+
+	<script th:inline="javascript">
+		async function spinWheel() {
+			const wheel = document.getElementById('wheel');
+			const button = document.getElementById('spinButton');
+
+			// ボタンを無効化
+			button.disabled = true;
+			button.value = '抽選中...';
+
+			try {
+				// サーバーから結果を取得
+				const response = await fetch(/*[[@{/client/roulette/run}]]*/ '/shared_shop/client/roulette/run', {
+					method: 'POST',
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest'
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error('Network response was not ok');
+				}
+
+				const text = await response.text();
+				if (!text || text.trim() === '') {
+					// 既に実行済みなどの場合
+					window.location.href = /*[[@{/}]]*/ '/shared_shop/';
+					return;
+				}
+
+				const result = JSON.parse(text);
+
+				const winningNumber = result.winningNumber;
+
+				// サーバーの当選番号（0-99、確率は不均等）を、ビジュアル上の等分セグメントにマップする
+				// 1等: num < 1   (1%)  -> segment 0
+				// 2等: num < 5   (4%)  -> segment 1
+				// 3等: num < 20  (15%) -> segment 2
+				// 4等: num < 50  (30%) -> segment 3
+				// 5等: その他     (50%) -> segment 4
+				let segmentIndex;
+				if (winningNumber < 1) segmentIndex = 0;
+				else if (winningNumber < 5) segmentIndex = 1;
+				else if (winningNumber < 20) segmentIndex = 2;
+				else if (winningNumber < 50) segmentIndex = 3;
+				else segmentIndex = 4;
+
+				// 当選したセグメントの中心を狙う
+				const stopDegree = 360 - (segmentIndex * 72 + 36);
+				const totalDegree = 1800 + stopDegree; // 最低5回転
+
+				// アニメーション実行
+				wheel.style.transform = `rotate(${totalDegree}deg)`;
+
+				// アニメーション終了後に結果画面へ遷移
+				setTimeout(() => {
+					window.location.href = /*[[@{/client/roulette/result}]]*/ '/shared_shop/client/roulette/result';
+				}, 4500);
+
+			} catch (error) {
+				console.error('Error:', error);
+				alert('通信エラーが発生しました。');
+				button.disabled = false;
+				button.value = 'ルーレットを回す！';
+			}
+		}
+	</script>
+</body>
+</html>
