@@ -27,6 +27,14 @@
 			</form>
 		</div>
 		<br/>
+		<h2 th:class="title">ログインルーレット</h2>
+		<div class="roulette-link" style="padding: 10px; text-align: center;">
+			<a th:href="@{/client/roulette}" style="display: block; padding: 10px; background-color: #ff6b6b; color: white; border-radius: 5px; text-decoration: none; font-weight: bold;">
+				🎰 ルーレットに挑戦！
+			</a>
+		</div>
+
+		<br/>
 		<h2 th:class="title">商品名検索</h2>
 		<div class="form">
 			<form th:action="@{/client/item/search}" method="get">

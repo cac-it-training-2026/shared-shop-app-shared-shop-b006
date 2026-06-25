@@ -94,7 +94,7 @@ public class ClientOrderShowController {
 			// orderレコードから紐づくOrderItemのListを取り出す
 			List<OrderItem> orderItemList = order.getOrderItemsList();
 			// PriceCalcクラスのorderItemPriceTotalメソッドを使用して合計金額を算出
-			int total = priceCalc.orderItemPriceTotal(orderItemList);
+			int total = priceCalc.calculateOrderTotal(order);
 
 			// 合計金額のセット
 			orderBean.setTotal(total);
@@ -148,6 +148,12 @@ public class ClientOrderShowController {
 		// 注文商品情報を取得
 		List<OrderItemBean> orderItemBeanList = beanTools.generateOrderItemBeanList(order.getOrderItemsList());
 
+		// 小計・割引の算出
+		int subtotalSum = priceCalc.orderItemPriceTotal(order.getOrderItemsList());
+		int discountRate = (order.getDiscountRate() != null) ? order.getDiscountRate() : 0;
+		model.addAttribute("subtotalSum", subtotalSum);
+		model.addAttribute("discountRate", discountRate);
+
 		// レビュー投稿済みフラグを判定
 		List<Boolean> reviewedList = order.getOrderItemsList().stream()
 				.map(oi -> (Boolean) reviewRepository.existsByOrderIdAndItemIdAndDeleteFlag(order.getId(),
@@ -155,7 +161,10 @@ public class ClientOrderShowController {
 				.toList();
 
 		// 合計金額を算出
-		int total = priceCalc.orderItemBeanPriceTotalUseSubtotal(orderItemBeanList);
+		int total = priceCalc.calculateOrderTotal(order);
+
+		// 合計金額のセット
+		orderBean.setTotal(total);
 
 		// 注文情報をViewへ渡す
 		model.addAttribute("order", orderBean);

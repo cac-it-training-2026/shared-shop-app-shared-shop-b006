@@ -3,7 +3,6 @@
 	th:replace="~{common/layout_5block :: layout(~{::title},~{::body/content()})}">
 
 <head>
-	<script th:src="@{/js/payment_input.js}" type="text/javascript"></script>
 	<title th:text="#{title.order.payment.input}+' | '+ #{shop.title}"> </title>
 	<meta charset="UTF-8" />
 </head>
@@ -13,51 +12,57 @@
 	<p th:class="input_message" th:text="#{msg.order.payment.input}"></p>
 
 	<div class="user_info_form_area">
-		<form th:action="@{/client/order/check}" method="post">
+		<form th:action="@{/client/order/check}" th:object="${orderForm}" method="post">
 			<ul class="payment_method_select">
 				<li>
 					<label class="radio_label">
-						<input type="radio" name="payMethod" value="1" th:if="${payMethod == 1}" checked="checked"
-							onclick=" payChange();" />
-						<input type="radio" name="payMethod" value="1"
-							th:unless="${payMethod == 1}" />[[#{paymethod.credit.str}]]
+						<input type="radio" th:field="*{payMethod}" value="1" />[[#{paymethod.credit.str}]]
 					</label>
 				</li>
 				<li>
 					<label class="radio_label">
-						<input type="radio" name="payMethod" value="2" th:if="${payMethod == 2}" checked="checked"
-							onclick=" payChange();" />
-						<input type="radio" name="payMethod" value="2"
-							th:unless="${payMethod == 2}" />[[#{paymethod.bank.str}]]
+						<input type="radio" th:field="*{payMethod}" value="2" />[[#{paymethod.bank.str}]]
 					</label>
 				</li>
 				<li>
 					<label class="radio_label">
-						<input type="radio" name="payMethod" value="3" th:if="${payMethod  == 3}" checked="checked"
-							onclick=" payChange();" />
-						<input type="radio" name="payMethod" value="3"
-							th:unless="${payMethod  == 3}" />[[#{paymethod.onarrival.str}]]
+						<input type="radio" th:field="*{payMethod}" value="3" />[[#{paymethod.onarrival.str}]]
 					</label>
 				</li>
 				<li>
 					<label class="radio_label">
-						<input type="radio" name="payMethod" value="4" th:if="${payMethod == 4}" checked="checked"
-							onclick=" payChange();" />
-						<input type="radio" name="payMethod" value="4"
-							th:unless="${payMethod == 4}" />[[#{paymethod.emoney.str}]]
+						<input type="radio" th:field="*{payMethod}" value="4" />[[#{paymethod.emoney.str}]]
 					</label>
 				</li>
 				<li>
 					<label class="radio_label">
-						<input type="radio" name="payMethod" value="5" th:if="${payMethod == 5}" checked="checked"
-							onclick=" payChange();" />
-						<input type="radio" name="payMethod" value="5"
-							th:unless="${payMethod == 5}" />[[#{paymethod.convenience.str}]]
+						<input type="radio" th:field="*{payMethod}" value="5" />[[#{paymethod.convenience.str}]]
 					</label>
 				</li>
 			</ul>
 
-			<input type="submit" class="send_button" value="次へ" />
+			<br />
+
+			<h3 th:class="title">クーポンの利用</h3>
+			<p th:if="${#lists.isEmpty(coupons)}">現在利用可能なクーポンはありません。</p>
+			<ul th:unless="${#lists.isEmpty(coupons)}" style="list-style: none; padding-left: 0;">
+				<li th:each="coupon : ${coupons}" style="margin-bottom: 10px; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+					<label>
+						<input type="radio" th:value="${coupon.id}" th:field="*{couponId}" />
+						<span style="font-weight: bold; color: #ff6b6b;" th:text="|${coupon.discountRate}% OFF クーポン|"></span>
+						<br/>
+						<span style="font-size: 0.8em; color: #666;" th:text="|有効期限: ${coupon.expiryDate}|"></span>
+					</label>
+				</li>
+				<li style="margin-top: 10px;">
+					<label>
+						<input type="radio" value="0" th:field="*{couponId}" />
+						クーポンを利用しない
+					</label>
+				</li>
+			</ul>
+
+			<input type="submit"  class="send_button" value="次へ" />
 
 		</form>
 		<form th:action="@{/client/order/payment/back}" method="post" class="update">
