@@ -618,10 +618,18 @@
             .section-title {
                 font-size: 1.75rem;
             }
-            .screenshots-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+     @media (max-width: 768px) {
+    .screenshots-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* PC用を明示的に指定 */
+@media (min-width: 769px) {
+    .screenshots-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
         @media (max-width: 768px) {
     /* ナビ：リンクを非表示にする（または折り返す） */
     .nav-links {
