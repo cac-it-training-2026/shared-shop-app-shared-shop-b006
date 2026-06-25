@@ -71,7 +71,10 @@
 					<span th:text="|${review.helpfulCount} #{review.helpful.unit}|"></span>
 					<form th:action="@{/client/review/helpful}" method="post" class="inline_form" th:if="${session.user != null and session.user.id != review.user.id}">
 						<input type="hidden" name="reviewId" th:value="${review.id}" />
-						<input type="submit" th:value="#{review.helpful.button}" class="helpful_button" />
+						<input type="submit"
+							th:value="${votedReviewIds != null and #lists.contains(votedReviewIds, review.id)} ? #{review.helpful.button.voted} : #{review.helpful.button}"
+							th:classappend="${votedReviewIds != null and #lists.contains(votedReviewIds, review.id)} ? 'voted'"
+							class="helpful_button" style="width: auto;" />
 					</form>
 				</div>
 			</div>
