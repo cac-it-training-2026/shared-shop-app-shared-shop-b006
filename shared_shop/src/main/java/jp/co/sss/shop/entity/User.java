@@ -95,6 +95,12 @@ public class User {
 	private LocalDateTime lockTime;
 
 	/**
+	 * 最後にルーレットを実行した日付
+	 */
+	@Column(name = "last_roulette_date")
+	private Date lastRouletteDate;
+
+	/**
 	 * 会員IDの取得
 	 * @return 会員ID
 	 */
@@ -284,5 +290,21 @@ public class User {
 	 */
 	public void setLockTime(LocalDateTime lockTime) {
 		this.lockTime = lockTime;
+	}
+
+	/**
+	 * 最後にルーレットを実行した日付の取得
+	 * @return 最後にルーレットを実行した日付
+	 */
+	public Date getLastRouletteDate() {
+		return lastRouletteDate;
+	}
+
+	/**
+	 * 最後にルーレットを実行した日付のセット
+	 * @param lastRouletteDate 最後にルーレットを実行した日付
+	 */
+	public void setLastRouletteDate(Date lastRouletteDate) {
+		this.lastRouletteDate = lastRouletteDate;
 	}
 }

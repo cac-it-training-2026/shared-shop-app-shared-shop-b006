@@ -66,6 +66,16 @@
 					   th:text="#{review.write}">レビューを書く</a>
 				</td>
 			</tr>
+						<tr>
+							<td colspan="3"></td>
+							<td class="total">小計</td>
+							<td class="total" th:text="${subtotalSum}"></td>
+						</tr>
+						<tr th:if="${discountRate > 0}">
+							<td colspan="3"></td>
+							<td class="total" style="color: #ff6b6b;">割引 ([[${discountRate}]]% OFF)</td>
+							<td class="total" style="color: #ff6b6b;" th:text="'-' + (${subtotalSum} - ${total})"></td>
+						</tr>
 			<tr>
 				<td colspan="3"></td>
 				<td class="total">[[#{data.total}]]</td>
