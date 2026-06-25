@@ -63,6 +63,11 @@ public class ClientReviewHelpfulController {
 
 		Review review = reviewOpt.get();
 
+		// レビュー投稿者本人の場合は処理をスキップ
+		if (loginUser.getId().equals(review.getUser().getId())) {
+			return "redirect:/client/item/detail/" + review.getItem().getId();
+		}
+
 		// 重複判定（既に「参考になった」を押しているか）
 		if (!reviewHelpfulLogRepository.existsByReviewIdAndUserId(reviewId, loginUser.getId())) {
 			// 未投票の場合のみ保存

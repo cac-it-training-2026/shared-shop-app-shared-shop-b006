@@ -69,7 +69,7 @@
 				<div class="review_body" th:text="${review.body}"></div>
 				<div class="helpful_area">
 					<span th:text="|${review.helpfulCount} #{review.helpful.unit}|"></span>
-					<form th:action="@{/client/review/helpful}" method="post" class="inline_form" th:if="${session.user != null}">
+					<form th:action="@{/client/review/helpful}" method="post" class="inline_form" th:if="${session.user != null and session.user.id != review.user.id}">
 						<input type="hidden" name="reviewId" th:value="${review.id}" />
 						<input type="submit" th:value="#{review.helpful.button}" class="helpful_button" />
 					</form>
