@@ -613,6 +613,27 @@
                 grid-template-columns: 1fr;
             }
         }
+        @media (max-width: 768px) {
+    /* ナビ：リンクを非表示にする（または折り返す） */
+    .nav-links {
+        display: none;
+    }
+
+    /* ヒーロー：1カラムに変更 */
+    .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* ヒーロービジュアル（右カラム）を下に移動 */
+    .hero-visual {
+        order: 1;
+    }
+
+    .hero-content {
+        order: 0;
+    }
+}
     </style>
 </head>
 <body>
