@@ -44,6 +44,15 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 	void incrementHelpfulCount(@Param("reviewId") Integer reviewId);
 
 	/**
+	 * 対象レビューの「参考になった」数を1デクリメントする
+	 * @param reviewId レビューID
+	 */
+	@org.springframework.data.jpa.repository.Modifying
+	@org.springframework.transaction.annotation.Transactional
+	@Query("UPDATE Review r SET r.helpfulCount = r.helpfulCount - 1 WHERE r.id = :reviewId")
+	void decrementHelpfulCount(@Param("reviewId") Integer reviewId);
+
+	/**
 	 * 商品ごとの平均評価を取得
 	 * @param itemId 商品ID
 	 * @param deleteFlag 削除フラグ

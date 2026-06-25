@@ -728,3 +728,9 @@ p.link_center {
 }
 
 
+
+.helpful_button.voted {
+    background-color: #ff9900 !important;
+    color: white !important;
+    border-color: #e68a00 !important;
+}

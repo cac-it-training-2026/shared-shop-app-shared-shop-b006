@@ -15,10 +15,12 @@ import jakarta.servlet.http.HttpServletRequest; // リンク元判定用
 import jakarta.servlet.http.HttpSession; // セッション判定用
 import jp.co.sss.shop.bean.ItemBean;
 import jp.co.sss.shop.entity.Category;
+import jp.co.sss.shop.bean.UserBean;
 import jp.co.sss.shop.entity.Item;
 import jp.co.sss.shop.entity.Review;
 import jp.co.sss.shop.repository.CategoryRepository;
 import jp.co.sss.shop.repository.ItemRepository;
+import jp.co.sss.shop.repository.ReviewHelpfulLogRepository;
 import jp.co.sss.shop.repository.ReviewRepository;
 import jp.co.sss.shop.service.BeanTools;
 import jp.co.sss.shop.util.Constant;
@@ -52,6 +54,12 @@ public class ClientItemShowController {
 	 */
 	@Autowired
 	ReviewRepository reviewRepository;
+
+	/**
+	 * レビューの「参考になった」ログ リポジトリ
+	 */
+	@Autowired
+	ReviewHelpfulLogRepository reviewHelpfulLogRepository;
 
 	//	/**
 	//	 * サイドバー表示用の共通処理
@@ -310,6 +318,14 @@ public class ClientItemShowController {
 
 		// レビュー一覧と集計情報を取得
 		List<Review> reviewList = reviewRepository.findByItemIdAndDeleteFlagOrderByInsertDateDesc(id, Constant.NOT_DELETED);
+
+		// ログイン中の場合、自分が「参考になった」を押したレビューIDを取得
+		UserBean loginUser = (UserBean) session.getAttribute("user");
+		if (loginUser != null) {
+			List<Integer> votedReviewIds = reviewHelpfulLogRepository.findReviewIdsByUserId(loginUser.getId());
+			model.addAttribute("votedReviewIds", votedReviewIds);
+		}
+
 		Double avgRating = reviewRepository.getAverageRating(id, Constant.NOT_DELETED);
 		Long reviewCount = reviewRepository.getReviewCount(id, Constant.NOT_DELETED);
 		itemBean.setAverageRating(avgRating != null ? avgRating : 0.0);

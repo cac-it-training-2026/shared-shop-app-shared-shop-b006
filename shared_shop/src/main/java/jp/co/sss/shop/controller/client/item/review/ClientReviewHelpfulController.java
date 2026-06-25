@@ -63,8 +63,18 @@ public class ClientReviewHelpfulController {
 
 		Review review = reviewOpt.get();
 
+		// レビュー投稿者本人の場合は処理をスキップ
+		if (loginUser.getId().equals(review.getUser().getId())) {
+			return "redirect:/client/item/detail/" + review.getItem().getId();
+		}
+
 		// 重複判定（既に「参考になった」を押しているか）
-		if (!reviewHelpfulLogRepository.existsByReviewIdAndUserId(reviewId, loginUser.getId())) {
+		if (reviewHelpfulLogRepository.existsByReviewIdAndUserId(reviewId, loginUser.getId())) {
+			// 既に投票済みの場合は削除（トグル）
+			reviewHelpfulLogRepository.deleteByReviewIdAndUserId(reviewId, loginUser.getId());
+			// 対象レビューのhelpfulCountを1減らす
+			reviewRepository.decrementHelpfulCount(reviewId);
+		} else {
 			// 未投票の場合のみ保存
 			ReviewHelpfulLog log = new ReviewHelpfulLog();
 			log.setReview(review);
@@ -77,7 +87,6 @@ public class ClientReviewHelpfulController {
 
 			// 対象レビューのhelpfulCountを1増やす
 			reviewRepository.incrementHelpfulCount(reviewId);
-
 		}
 
 		// 商品詳細画面へリダイレクト
